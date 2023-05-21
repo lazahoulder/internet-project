@@ -1,0 +1,128 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello TeamController!{% endblock %}
+
+{% block body %}
+    <div class="container" x-data="testData()">
+        <div class="row">
+            <div class="col-sm-9">
+                <h3>Teams</h3>
+            </div>
+            <div class="col-sm-3">
+                <button type="button" class="btn btn-primary" @click="showModal = ! showModal">Primary</button>
+            </div>
+        </div>
+        <div class="row">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Country</th>
+                    <th scope="col">Acount balance</th>
+                    <th scope="col">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <template x-for="team in teams">
+                    <tr>
+                        <td x-text="team.name"></td>
+                        <td x-text="team.country"></td>
+                        <td x-text="team.acountBalance"></td>
+                        <td class="text-right">
+                            <div class="hidden-sm hidden-xs btn-group">
+                                <button class="btn btn-xs btn-info">
+                                    <i class="ace-icon fa fa-eye bigger-120"></i>
+                                </button>
+                                <button class="btn btn-xs btn-default">
+                                    <i class="ace-icon fa fa-edit bigger-120"></i>
+                                </button>
+                                <button class="btn btn-xs btn-danger"
+                                        @click="removeTeam(team.id).then(r => retrieveTeam())">
+                                    <i class="ace-icon fa fa-close bigger-120"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Launch demo modal
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    </div>
+    <script type="application/javascript">
+        function testData() {
+            return {
+                teams: [],
+                showList: true,
+                showModal: false,
+                formData: {
+                    name: "",
+                    country: "",
+                    acountBalance: 0,
+                },
+                uri: '{{ path('api_team_list') }}',
+                async retrieveTeam(uri = this.uri) {
+                    this.teams = await (await fetch(uri)).json()
+                },
+
+                async removeTeam(teamId) {
+                    let uri = this.uri + teamId;
+
+                    await fetch(uri, {
+                        method: 'DELETE',
+                    });
+                },
+
+                async createTeam() {
+                    fetch(this.uri, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    })
+                        .then(() => {
+                            this.formData.name = "";
+                            this.formData.country = "";
+                            this.formData.acountBalance = 0;
+                            this.formMessage = "Form successfully submitted.";
+                        })
+                        .catch(() => {
+                            this.formMessage = "Something went wrong.";
+                        });
+                },
+
+                init() {
+                    this.retrieveTeam();
+                }
+            }
+        }
+    </script>
+{% endblock %}

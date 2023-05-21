@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello IndexController!{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="row" >
+        <div class="col-sm-12">
+            <h3>Recents bids</h3>
+        </div>
+        <div class="col-sm-12">
+            {% include('index/bids.html.twig') %}
+        </div>
+    </div>
+    <div class="row">
+
+    </div>
+</div>
+{% endblock %}
