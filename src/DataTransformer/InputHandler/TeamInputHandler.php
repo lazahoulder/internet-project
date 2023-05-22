@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataHandler\InputHandler;
+namespace App\DataTransformer\InputHandler;
 
 use App\Dto\IntputDTO\TeamInput;
 use App\Entity\Team;

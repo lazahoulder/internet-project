@@ -22,8 +22,9 @@
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.1/dist/cdn.min.js"></script>
     {% endblock %}
 </head>
-<body class="modal-open" style="padding-top: 30px">
+<body class="modal-open" >
 <div class="container-fluid">
+    {% include "partial/navbar.html.twig" %}
     {% block body %}{% endblock %}
 </div>
 </body>
