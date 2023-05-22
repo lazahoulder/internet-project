@@ -66,7 +66,7 @@
                          <input type="text" class="form-control" id="balanceInput" x-model="formData.acountBalance">
                          <div x-show="isNaN(formData.acountBalance)" class="form-text text-danger">This value is not valid</div>
                      </div>
-                     <button class="btn btn-primary" @click.prevent="toogleForm()">
+                     <button class="btn btn-primary" @click.prevent="toogleVue()">
                          <i class="fa fa-close"></i>
                          &nbsp;Cancel
                      </button>
@@ -92,20 +92,23 @@
                     acountBalance: 0,
                 },
                 uri: '{{ path('api_team_list') }}',
+                createUri: {{ path('api_team_create') }},
+
                 async retrieveTeam(uri = this.uri) {
                     this.teams = await (await fetch(uri)).json()
                 },
 
                 toogleForm(title = 'Teams') {
-                    this.showList = !this.showList;
-                    this.showForm = !this.showForm;
+                    this.showList = false;
+                    this.showForm = true;
                     this.headerTitle = title;
                     this.initFormData();
                 },
 
                 toogleVue(title = 'Teams') {
-                    this.showList = !this.showList;
-                    this.showVue = !this.showVue;
+                    this.showList = true;
+                    this.showVue = false;
+                    this.showForm = false;
                     this.headerTitle = title;
                 },
 
@@ -137,8 +140,11 @@
 
                 submitForm() {
                     if (this.editData) {
-                        this.updateTeam().then(this.retrieveTeam);
+                        this.updateTeam().then(this.retrieveTeam());
+                    } else {
+                        this.addTeam().then(this.retrieveTeam());
                     }
+                    this.toogleVue();
                     this.initFormData();
                 },
 
@@ -158,7 +164,8 @@
                 },
 
                 async addTeam() {
-                    fetch(this.uri, {
+                    console.log(this.formData);
+                    await fetch(this.createUri, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -176,7 +183,7 @@
 
                 async updateTeam() {
                     let uri = this.uri+this.editId;
-                    fetch(uri, {
+                    await fetch(uri, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
@@ -193,6 +200,7 @@
                 },
 
                 init() {
+                    this.toogleVue();
                     this.retrieveTeam();
                 }
             }
