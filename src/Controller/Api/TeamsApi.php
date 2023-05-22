@@ -24,7 +24,7 @@ class TeamsApi extends BaseApiController
         parent::__construct($serializer);
     }
 
-    #[Route('/', name: 'api_team_list')]
+    #[Route('/', name: 'api_team_list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
         return $this->json($this->repository->findAll());
@@ -37,7 +37,6 @@ class TeamsApi extends BaseApiController
         ValidatorInterface $validator
     ): Response
     {
-        dd($request->getContent());
         /** @var TeamInput $input */
         $input = $this->serializer->deserialize($request->getContent(), TeamInput::class, 'json');
         $errors = $validator->validate($input);
