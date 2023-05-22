@@ -91,14 +91,16 @@
                     acountBalance: 0,
                 },
 
-                openForm() {
+                openForm(header = 'New team') {
                     this.showList = false;
                     this.showForm = true;
+                    this.headerTitle = header;
                 },
 
                 closeForm() {
                     this.showList = true;
                     this.showForm = false;
+                    this.headerTitle = 'Teams';
                 },
 
                 initFormData(team = null) {
@@ -118,7 +120,7 @@
                 },
 
                 editTeam(teamId) {
-                    this.openForm();
+                    this.openForm('Update Team');
                     let team = this.teams.find(elt => elt.id === teamId);
                     this.editId = teamId;
                     this.initFormData(team);
