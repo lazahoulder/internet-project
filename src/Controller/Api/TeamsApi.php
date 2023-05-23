@@ -2,10 +2,12 @@
 
 namespace App\Controller\Api;
 
-use App\DataHandler\InputHandler\TeamInputHandler;
+use App\DataTransformer\InputHandler\TeamInputHandler;
+use App\DataTransformer\OutputHandlar\TeamOutputHandler;
 use App\Dto\IntputDTO\TeamInput;
 use App\Entity\Team;
 use App\Repository\TeamRepository;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,16 +20,27 @@ class TeamsApi extends BaseApiController
 {
     public function __construct(
         SerializerInterface $serializer,
-        private TeamRepository $repository
+        private TeamRepository $repository,
+        private PaginatorInterface $paginator,
     )
     {
         parent::__construct($serializer);
     }
 
     #[Route('/', name: 'api_team_list', methods: ['GET'])]
-    public function list(Request $request): JsonResponse
+    public function list(Request $request, TeamOutputHandler $outputHandler): JsonResponse
     {
-        return $this->json($this->repository->findAll());
+        $pagination = $this->paginator->paginate(
+            $this->repository->findAllQB(),
+            (int) $request->get('page', 1)
+        );
+        $data = [
+            'results' => $outputHandler->listNormalize($pagination->getItems()),
+            'page' => $pagination->getCurrentPageNumber(),
+            'pageNumber' => ceil($pagination->getTotalItemCount()/$pagination->getItemNumberPerPage()),
+        ];
+
+        return $this->json($data, Response::HTTP_OK);
     }
 
     #[Route('/', name: 'api_team_create', methods: ['POST'])]

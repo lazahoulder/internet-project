@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('api/bids')]
-class BIdApi extends BaseApiController
+class BidApi extends BaseApiController
 {
     public function __construct(
         SerializerInterface   $serializer,

@@ -6,6 +6,7 @@ use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
 class Team implements TeamInterface
@@ -13,15 +14,19 @@ class Team implements TeamInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('team_list')]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('team_list')]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups('team_list')]
     private ?float $acountBalance = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('team_list')]
     private ?string $country = null;
 
     #[ORM\OneToMany(mappedBy: 'team', targetEntity: PlayerTeam::class, orphanRemoval: true)]
@@ -107,7 +112,7 @@ class Team implements TeamInterface
         return $this;
     }
 
-    public function getActualPlayers(): array
+    public function getActivePlayers(): array
     {
         $players = [];
 
@@ -119,9 +124,21 @@ class Team implements TeamInterface
         return $players;
     }
 
+    #[Groups('team_list')]
+    public function getCountActivePlayers(): int
+    {
+        return count($this->getActivePlayers());
+    }
+
     public function getInMarketPlayers()
     {
         return $this->getTeamPlayersByStatus(PlayerTeamInterface::IN_MARKET_STATE);
+    }
+
+    #[Groups('team_list')]
+    public function getCountInMarketPlayers(): int
+    {
+        return count($this->getInMarketPlayers());
     }
 
     public function getTeamPlayersByStatus(string $status): array

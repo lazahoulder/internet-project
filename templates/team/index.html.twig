@@ -16,6 +16,7 @@
             </div>
         </div>
         <div class="row" x-show="showList">
+            <div x-text="teams.length"></div>
             <table class="table" >
                 <thead>
                 <tr>
@@ -47,7 +48,17 @@
                         </td>
                     </tr>
                 </template>
+                <template x-if="teams.length === 0">
+                    <tr>
+                        <td colspan="4">
+                            <div class="alert alert-info">
+                                There is no team in this time please add new :)
+                            </div>
+                        </td>
+                    </tr>
+                </template>
                 </tbody>
+
             </table>
         </div>
         <div class="row" x-show="showForm">
@@ -156,7 +167,8 @@
                 },
 
                 async retrieveTeam(uri = this.uri) {
-                    this.teams = await (await fetch(uri)).json()
+                    let response = await (await fetch(uri)).json();
+                    this.teams = response.results;
                 },
 
                 async removeTeam(teamId) {

@@ -63,4 +63,8 @@ class TeamRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function findAllQB()
+    {
+        return $this->createQueryBuilder('t');
+    }
 }

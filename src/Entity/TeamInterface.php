@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 interface TeamInterface
 {
@@ -29,9 +30,13 @@ interface TeamInterface
 
     public function removePlayerTeam(PlayerTeamInterface $playerTeam): TeamInterface;
 
-    public function getActualPlayers() : array;
+    public function getActivePlayers() : array;
 
     public function increaseBalance(float $amount) : TeamInterface;
 
     public function decreaseBalance(float $amount) : TeamInterface;
+
+    public function getCountActivePlayers(): int;
+
+    public function getCountInMarketPlayers(): int;
 }
