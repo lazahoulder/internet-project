@@ -5,8 +5,11 @@ namespace App\Entity;
 use App\Repository\PlayerTeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ReadableCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: PlayerTeamRepository::class)]
 class PlayerTeam implements PlayerTeamInterface
@@ -14,35 +17,40 @@ class PlayerTeam implements PlayerTeamInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?float $amountValue = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $status = null;
-
-    #[ORM\Column(length: 255)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?string $state = null;
 
     #[ORM\ManyToOne(inversedBy: 'playerTeams')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?Player $player = null;
 
     #[ORM\ManyToOne(inversedBy: 'playerTeams')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['player_team_show'])]
     private ?Team $team = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?\DateTimeInterface $expectedEndDate = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?float $sellingValue = null;
 
     #[ORM\OneToMany(mappedBy: 'playerTeam', targetEntity: Bid::class, orphanRemoval: true)]
@@ -91,18 +99,6 @@ class PlayerTeam implements PlayerTeamInterface
     public function setAmountValue(?float $amountValue): self
     {
         $this->amountValue = $amountValue;
-
-        return $this;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): self
-    {
-        $this->status = $status;
 
         return $this;
     }
@@ -210,5 +206,18 @@ class PlayerTeam implements PlayerTeamInterface
         }
 
         return $this;
+    }
+
+    #[Groups(['team_show', 'player_team_show'])]
+    public function getCountActiveBid() : int
+    {
+        return $this->getActiveBids()->count();
+    }
+
+    public function getActiveBids() : ReadableCollection
+    {
+        return $this->getBids()->filter(function($element) {
+            return $element > 1;
+        });
     }
 }

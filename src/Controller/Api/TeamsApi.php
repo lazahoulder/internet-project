@@ -43,6 +43,12 @@ class TeamsApi extends BaseApiController
         return $this->json($data, Response::HTTP_OK);
     }
 
+    #[Route('/{id}', name: 'api_team_read', methods: ['GET'])]
+    public function read(Team $team, TeamOutputHandler $outputHandler): JsonResponse
+    {
+        return $this->json($outputHandler->normalize($team), Response::HTTP_OK);
+    }
+
     #[Route('/', name: 'api_team_create', methods: ['POST'])]
     public function createTeam(
         Request $request,

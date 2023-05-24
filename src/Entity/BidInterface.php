@@ -4,6 +4,9 @@ namespace App\Entity;
 
 interface BidInterface
 {
+    public const ACTIVE_STATUS = 'active';
+    public const CLOSED_STATUS = 'closed';
+
     public function getId(): ?int;
 
     public function getValue(): ?float;

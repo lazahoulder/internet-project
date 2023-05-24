@@ -115,17 +115,9 @@
                 },
 
                 initFormData(team = null) {
-                    if (team) {
-                        this.formData.name = team.name;
-                        this.formData.country = team.country;
-                        this.formData.acountBalance = team.acountBalance;
-                    } else {
-                        this.formData = {
-                            name: "",
-                            country: "",
-                            acountBalance: 0,
-                        };
-                    }
+                    this.formData.name = teamteam.name;
+                    this.formData.country = team.country;
+                    this.formData.acountBalance = team.acountBalance;
 
                     this.editData = false;
                 },

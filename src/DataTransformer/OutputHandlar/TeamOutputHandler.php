@@ -3,6 +3,7 @@
 namespace App\DataTransformer\OutputHandlar;
 
 use App\Entity\PlayerTeamInterface;
+use App\Entity\Team;
 use App\Entity\TeamInterface;
 use App\Repository\PlayerTeamRepository;
 use Doctrine\Common\Collections\Collection;
@@ -26,8 +27,8 @@ class TeamOutputHandler
         return $data;
     }
 
-    public function simpleTransfo(PlayerTeamInterface $playerTeam)
+    public function normalize(Team $team)
     {
-
+        return $this->objectNormalizer->normalize($team, null, ['groups' => 'team_show']);
     }
 }

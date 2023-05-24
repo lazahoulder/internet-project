@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="conainer">
+    <div class="row">
+
+    </div>
+</div>
+    <script type="application/javascript">
+        function players() {
+            return {
+                players: [],
+                showList: true,
+                headerTitle: 'Teams',
+                uri: '{{ path('api_team_list') }}',
+                showForm:false,
+                editData: false,
+                editId: null,
+                formData: {
+                    name: "",
+                    country: "",
+                    acountBalance: 0,
+                },
+
+                openForm(header = 'New team') {
+                    this.showList = false;
+                    this.showForm = true;
+                    this.headerTitle = header;
+                },
+
+                closeForm() {
+                    this.showList = true;
+                    this.showForm = false;
+                    this.headerTitle = 'Teams';
+                },
+
+                initFormData(team = null) {
+                    this.formData.name = teamteam.name;
+                    this.formData.country = team.country;
+                    this.formData.acountBalance = team.acountBalance;
+
+                    this.editData = false;
+                },
+
+                editTeam(teamId) {
+                    this.openForm('Update Team');
+                    let team = this.teams.find(elt => elt.id === teamId);
+                    this.editId = teamId;
+                    this.initFormData(team);
+                    this.editData = true;
+                },
+
+                async updateTeam() {
+                    this.formData.acountBalance = parseInt(this.formData.acountBalance);
+                    let uri = this.uri+this.editId;
+                    await fetch(uri, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    })
+                        .then(() => {
+                            this.closeForm();
+                            this.retrieveTeam();
+                        })
+                        .catch(() => {
+                            this.formMessage = "Something went wrong.";
+                        });
+                },
+
+                submitForm() {
+                    if (this.editData) {
+                        this.updateTeam();
+                    } else {
+                        this.addTeam();
+                    }
+                },
+
+                async retrieveTeam(uri = this.uri) {
+                    let response = await (await fetch(uri)).json();
+                    this.teams = response.results;
+                },
+
+                async removeTeam(teamId) {
+                    let uri = this.uri + teamId;
+
+                    await fetch(uri, {
+                        method: 'DELETE',
+                    }).then(() => {
+                        this.retrieveTeam();
+                    });
+                },
+
+                async addTeam() {
+                    this.formData.acountBalance = parseInt(this.formData.acountBalance);
+                    await fetch(this.uri, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    })
+                        .then(() => {
+                            this.closeForm();
+                            this.retrieveTeam();
+                        })
+                        .catch(() => {
+                            this.formMessage = "Something went wrong.";
+                        });
+                },
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block title %}
+
+{% endblock %}
+

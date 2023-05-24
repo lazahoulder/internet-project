@@ -6,6 +6,8 @@ use App\Repository\PlayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\SerializedName;
 
 #[ORM\Entity(repositoryClass: PlayerRepository::class)]
 class Player implements PlayerInterface
@@ -13,12 +15,15 @@ class Player implements PlayerInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['team_show', 'player_team_show'])]
     private ?string $surname = null;
 
     #[ORM\OneToMany(mappedBy: 'player', targetEntity: PlayerTeam::class, orphanRemoval: true)]
@@ -103,5 +108,10 @@ class Player implements PlayerInterface
     public function getActualTeam(): TeamInterface
     {
         return $this->getActualActiveStatus()->getTeam();
+    }
+
+    public function getCountActiveBids() : int
+    {
+        return $this->getActualActiveStatus()->getCountActiveBid();
     }
 }

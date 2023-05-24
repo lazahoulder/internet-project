@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\Collection;
+
 interface PlayerTeamInterface
 {
     const ACTIVE_STATE = 'active';
@@ -20,10 +22,6 @@ interface PlayerTeamInterface
     public function getAmountValue(): ?float;
 
     public function setAmountValue(?float $amountValue): PlayerTeamInterface;
-
-    public function getStatus(): ?string;
-
-    public function setStatus(string $status): PlayerTeamInterface;
 
     public function getState(): ?string;
 
@@ -48,4 +46,15 @@ interface PlayerTeamInterface
     public function publishInMarketPlayer(float $sellValue) : self;
 
     public function closePlayerContract(): void;
+
+    public function addBid(Bid $bid): self;
+
+    public function removeBid(Bid $bid): self;
+
+    /**
+     * @return Collection<int, Bid>
+     */
+    public function getBids(): Collection;
+
+    public function getCountActiveBid(): int;
 }

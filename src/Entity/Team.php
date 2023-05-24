@@ -6,6 +6,7 @@ use App\Repository\TeamRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use JetBrains\PhpStorm\NoReturn;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
@@ -14,19 +15,19 @@ class Team implements TeamInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups('team_list')]
+    #[Groups(['team_list', 'team_show'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('team_list')]
+    #[Groups(['team_list', 'team_show'])]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups('team_list')]
+    #[Groups(['team_list', 'team_show'])]
     private ?float $acountBalance = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('team_list')]
+    #[Groups(['team_list', 'team_show'])]
     private ?string $country = null;
 
     #[ORM\OneToMany(mappedBy: 'team', targetEntity: PlayerTeam::class, orphanRemoval: true)]
@@ -112,19 +113,20 @@ class Team implements TeamInterface
         return $this;
     }
 
+    #[Groups(['team_show'])]
     public function getActivePlayers(): array
     {
         $players = [];
 
         foreach ($this->getPlayerTeams() as $playerTeam) {
             if (PlayerTeamInterface::INACTIVE_STATE === $playerTeam->getState()) continue;
-            $players[] = $playerTeam->getPlayer();
+            $players[] = $playerTeam;
         }
 
         return $players;
     }
 
-    #[Groups('team_list')]
+    #[Groups(['team_list', 'team_show'])]
     public function getCountActivePlayers(): int
     {
         return count($this->getActivePlayers());
@@ -135,7 +137,7 @@ class Team implements TeamInterface
         return $this->getTeamPlayersByStatus(PlayerTeamInterface::IN_MARKET_STATE);
     }
 
-    #[Groups('team_list')]
+    #[Groups(['team_list', 'team_show'])]
     public function getCountInMarketPlayers(): int
     {
         return count($this->getInMarketPlayers());
@@ -154,9 +156,6 @@ class Team implements TeamInterface
         return $players;
     }
 
-    /**
-     * @return Collection<int, Bid>
-     */
     public function getBids(): Collection
     {
         return $this->bids;

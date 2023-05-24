@@ -17,66 +17,6 @@ class TeamFixtures extends Fixture
                 'acountBalance' => 100000
             ],
             [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
-                'name' => 'usca foot',
-                'country' => 'Madagascar',
-                'acountBalance' => 100000
-            ],
-            [
                 'name' => 'real madrid',
                 'country' => 'Spain',
                 'acountBalance' => 100000
