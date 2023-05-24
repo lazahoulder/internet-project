@@ -16,7 +16,6 @@
             </div>
         </div>
         <div class="row" x-show="showList">
-            <div x-text="teams.length"></div>
             <table class="table" >
                 <thead>
                 <tr>
@@ -34,7 +33,7 @@
                         <td x-text="team.acountBalance"></td>
                         <td class="text-right">
                             <div class="hidden-sm hidden-xs btn-group">
-                                <button class="btn btn-xs btn-info">
+                                <button class="btn btn-xs btn-info" @click="showTeam(team.id)">
                                     <i class="ace-icon fa fa-eye bigger-120"></i>
                                 </button>
                                 <button class="btn btn-xs btn-secondary" @click="editTeam(team.id)">
@@ -93,6 +92,7 @@
                 showList: true,
                 headerTitle: 'Teams',
                 uri: '{{ path('api_team_list') }}',
+                baseUri: '{{ path('app_team_index') }}',
                 showForm:false,
                 editData: false,
                 editId: null,
@@ -100,6 +100,10 @@
                     name: "",
                     country: "",
                     acountBalance: 0,
+                },
+
+                showTeam(id) {
+                    window.location.href = this.baseUri+id;
                 },
 
                 openForm(header = 'New team') {

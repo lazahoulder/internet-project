@@ -1,115 +1,66 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="conainer">
+<div class="conainer" x-data="team()">
     <div class="row">
+        <div class="col-sm-3">Name: {{ team.name }}</div>
+        <div class="col-sm-3">Country: {{ team.country }}</span></div>
+        <div class="col-sm-3">Active players: <span x-text="countActivePlayers"></span></div>
+    </div>
+    <div class="row">
+        <table class="table" >
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Surname</th>
+                <th scope="col">Value</th>
+                <th scope="col">Active bids</th>
+                <th scope="col">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="player in players">
+                <tr>
+                    <td x-text="player.player.name"></td>
+                    <td x-text="player.player.surname"></td>
+                    <td x-text="player.amountValue"></td>
+                    <td x-text="player.countActiveBid"></td>
+                    <td class="text-right">
+                    </td>
+                </tr>
+            </template>
+            <template x-if="players.length === 0">
+                <tr>
+                    <td colspan="4">
+                        <div class="alert alert-info">
+                            There is no players in this team please add new :)
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            </tbody>
 
+        </table>
     </div>
 </div>
     <script type="application/javascript">
-        function players() {
+        function team() {
             return {
+                teamId: {{ team.id }},
                 players: [],
-                showList: true,
-                headerTitle: 'Teams',
-                uri: '{{ path('api_team_list') }}',
-                showForm:false,
-                editData: false,
-                editId: null,
-                formData: {
-                    name: "",
-                    country: "",
-                    acountBalance: 0,
-                },
+                name: '{{ team.name }}',
+                country: '{{ team.country }}',
+                countActivePlayers: '{{ team.countActivePlayers }}',
+                uri: '{{ path('api_team_read', {"id" : team.id}) }}',
 
-                openForm(header = 'New team') {
-                    this.showList = false;
-                    this.showForm = true;
-                    this.headerTitle = header;
-                },
-
-                closeForm() {
-                    this.showList = true;
-                    this.showForm = false;
-                    this.headerTitle = 'Teams';
-                },
-
-                initFormData(team = null) {
-                    this.formData.name = teamteam.name;
-                    this.formData.country = team.country;
-                    this.formData.acountBalance = team.acountBalance;
-
-                    this.editData = false;
-                },
-
-                editTeam(teamId) {
-                    this.openForm('Update Team');
-                    let team = this.teams.find(elt => elt.id === teamId);
-                    this.editId = teamId;
-                    this.initFormData(team);
-                    this.editData = true;
-                },
-
-                async updateTeam() {
-                    this.formData.acountBalance = parseInt(this.formData.acountBalance);
-                    let uri = this.uri+this.editId;
-                    await fetch(uri, {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Accept: "application/json",
-                        },
-                        body: JSON.stringify(this.formData),
-                    })
-                        .then(() => {
-                            this.closeForm();
-                            this.retrieveTeam();
-                        })
-                        .catch(() => {
-                            this.formMessage = "Something went wrong.";
-                        });
-                },
-
-                submitForm() {
-                    if (this.editData) {
-                        this.updateTeam();
-                    } else {
-                        this.addTeam();
-                    }
-                },
-
-                async retrieveTeam(uri = this.uri) {
+                async retrievePlayers(uri = this.uri) {
                     let response = await (await fetch(uri)).json();
-                    this.teams = response.results;
+                    this.players = response.activePlayers;
+                    this.countActivePlayers = response.countActivePlayers;
                 },
 
-                async removeTeam(teamId) {
-                    let uri = this.uri + teamId;
-
-                    await fetch(uri, {
-                        method: 'DELETE',
-                    }).then(() => {
-                        this.retrieveTeam();
-                    });
-                },
-
-                async addTeam() {
-                    this.formData.acountBalance = parseInt(this.formData.acountBalance);
-                    await fetch(this.uri, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Accept: "application/json",
-                        },
-                        body: JSON.stringify(this.formData),
-                    })
-                        .then(() => {
-                            this.closeForm();
-                            this.retrieveTeam();
-                        })
-                        .catch(() => {
-                            this.formMessage = "Something went wrong.";
-                        });
+                init() {
+                    this.retrievePlayers();
                 },
             }
         }
