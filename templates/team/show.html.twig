@@ -1,89 +1,126 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="container" x-data="team()">
-    <div class="row">
-        <div class="col-sm-12">
-            <h3>Team</h3>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col-sm-4">
-            <h6><strong>Name:</strong> {{ team.name }}</h6>
-        </div>
-        <div class="col-sm-4">
-            <h6 class="text-center"><strong>Country:</strong> {{ team.country }}</h6>
-        </div>
-        <div class="col-sm-4">
-            <h6 class="float-end"><strong>Active players:</strong>&nbsp;<span x-text="countActivePlayers"></span></h6>
-        </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col-sm-6">
-            <h5>Players</h5>
-        </div>
-        <div class="col-sm-6">
-            <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
-                <button type="button" class="btn btn-outline-primary">
-                    <i class="fa fa-plus"></i>
-                    &nbsp;New player
-                </button>
-                <button type="button" class="btn btn-outline-primary">
-                    <i class="fa fa-shopping-cart"></i>
-                    &nbsp;Buy Player
-                </button>
+    <div class="container" x-data="team()">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Team</h3>
             </div>
         </div>
-    </div>
-    <hr>
-    <div class="row">
-        <div class="col-sm-12">
-            <table class="table" >
-                <thead>
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Surname</th>
-                    <th scope="col">Value</th>
-                    <th scope="col">Active bids</th>
-                    <th scope="col">Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <template x-for="player in players">
+        <hr>
+        <div class="row">
+            <div class="col-sm-4">
+                <h6><strong>Name:</strong> {{ team.name }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <h6 class="text-center"><strong>Country:</strong> {{ team.country }}</h6>
+            </div>
+            <div class="col-sm-4">
+                <h6 class="float-end"><strong>Active players:</strong>&nbsp;<span x-text="countActivePlayers"></span>
+                </h6>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-sm-6">
+                <h5>Players</h5>
+            </div>
+            <div class="col-sm-6" x-show="showList">
+                <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
+                    <button type="button" class="btn btn-outline-primary" @click="addPlayer()">
+                        <i class="fa fa-plus"></i>
+                        &nbsp;New player
+                    </button>
+                    <button type="button" class="btn btn-outline-primary">
+                        <i class="fa fa-shopping-cart"></i>
+                        &nbsp;Buy Player
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row" x-show="showList">
+            <div class="col-sm-12">
+                <table class="table">
+                    <thead>
                     <tr>
-                        <td x-text="player.player.name"></td>
-                        <td x-text="player.player.surname"></td>
-                        <td x-text="player.amountValue"></td>
-                        <td x-text="player.countActiveBid"></td>
-                        <td class="text-right">
-                        </td>
+                        <th scope="col">Name</th>
+                        <th scope="col">Surname</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Active bids</th>
+                        <th scope="col">Action</th>
                     </tr>
-                </template>
-                <template x-if="players.length === 0">
-                    <tr>
-                        <td colspan="5">
-                            <div class="alert alert-info text-center">
-                                There is no players in this team please add new :)
-                            </div>
-                        </td>
-                    </tr>
-                </template>
-                </tbody>
+                    </thead>
+                    <tbody>
+                    <template x-for="player in players">
+                        <tr>
+                            <td x-text="player.player.name"></td>
+                            <td x-text="player.player.surname"></td>
+                            <td x-text="player.amountValue"></td>
+                            <td x-text="player.countActiveBid"></td>
+                            <td class="text-right">
+                            </td>
+                        </tr>
+                    </template>
+                    <template x-if="players.length === 0">
+                        <tr>
+                            <td colspan="5">
+                                <div class="alert alert-info text-center">
+                                    There is no players in this team please add new :)
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                    </tbody>
 
-            </table>
+                </table>
+            </div>
+        </div>
+        <div class="row" x-show="showForm">
+            <form @submit.prevent="">
+                <div class="mb-3">
+                    <input type="text" placeholder="Name" class="form-control" id="balanceInput" x-model="player.name">
+                </div>
+                <div class="mb-3">
+                    <input type="text" placeholder="Surname" class="form-control" id="balanceInput" x-model="player.surname">
+                </div>
+                <div class="mb-3">
+                    <input type="number" placeholder="Value" class="form-control" id="balanceInput" x-model="player.value">
+                </div>
+                <div class="mb-3">
+                    <div class="btn-group float-end" role="group" >
+                        <button class="btn btn-xs btn-outline-danger" @click.prevent="closeForm()">
+                            <i class="fa fa-close"></i>
+                            &nbsp;Cancel
+                        </button>
+                        <button type="submit" class="btn btn-outline-success">
+                            <i class="fa fa-check"></i>
+                            &nbsp;Submit
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-</div>
     <script type="application/javascript">
         function team() {
             return {
+                teamId: '{{ team.id }}',
                 players: [],
-                name: '{{ team.name }}',
-                country: '{{ team.country }}',
                 countActivePlayers: '{{ team.countActivePlayers }}',
                 uri: '{{ path('api_team_read', {"id" : team.id}) }}',
+                showList: true,
+                showForm: false,
+                player: {
+                    name: '',
+                    surname: '',
+                    value: '',
+                },
+
+                closeForm() {
+                    this.showList = true;
+                    this.showForm = false;
+                },
 
                 async retrievePlayers(uri = this.uri) {
                     let response = await (await fetch(uri)).json();
@@ -93,6 +130,31 @@
 
                 init() {
                     this.retrievePlayers();
+                },
+
+                addPlayer() {
+                    this.showList = false;
+                    this.showForm = true;
+                },
+
+                editPlayer() {
+
+                },
+
+                removePlayer() {
+
+                },
+
+                sellPlayer() {
+
+                },
+
+                createPlayer() {
+
+                },
+
+                updatePlayer() {
+
                 },
             }
         }

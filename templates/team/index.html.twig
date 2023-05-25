@@ -9,7 +9,7 @@
                 <h3 x-text="headerTitle"></h3>
             </div>
             <div class="col-sm-3">
-                <button x-show="showList" type="button" class="btn btn-primary" @click="openForm()">
+                <button x-show="showList" type="button" class="btn btn-primary" @click="createTeamForm()">
                     <i class="fa fa-plus"></i>
                     &nbsp;New team
                 </button>
@@ -76,31 +76,33 @@
                         <input type="text" class="form-control" id="balanceInput" x-model="formData.acountBalance">
                         <div x-show="isNaN(formData.acountBalance)" class="form-text text-danger">This value is not valid</div>
                     </div>
-                    <hr>
-                    <div class="mb-3">
+                    <div class="mb-3" x-show="!editData">
+                        <hr>
                             <button class="btn btn-outline-primary" @click.prevent="addPlayer()">
                                 <i class="fa fa-users"></i>
                                 &nbsp;Add player
                             </button>
                     </div>
-                    <template x-for="(player, index) in formData.players" :key="index">
-                        <div class="col-sm-12">
-                            <div class="mb-3">
-                                <input type="text" placeholder="Name" class="form-control" id="balanceInput" x-model="player.name">
+                    <div class="row" x-show="!editData">
+                        <template x-for="(player, index) in formData.players" :key="index">
+                            <div class="col-sm-3">
+                                <div class="mb-3">
+                                    <input type="text" placeholder="Name" class="form-control" id="balanceInput" x-model="player.name">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" placeholder="Surname" class="form-control" id="balanceInput" x-model="player.surname">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="number" placeholder="Value" class="form-control" id="balanceInput" x-model="player.value">
+                                </div>
+                                <div class="mb-3">
+                                    <button class="btn btn-xs btn-outline-danger" @click.prevent="removePlayer(index)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <input type="text" placeholder="Surname" class="form-control" id="balanceInput" x-model="player.surname">
-                            </div>
-                            <div class="mb-3">
-                                <input type="number" placeholder="Value" class="form-control" id="balanceInput" x-model="player.value">
-                            </div>
-                            <div class="mb-3">
-                                <button class="btn btn-xs btn-outline-danger" @click.prevent="removePlayer(index)">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
                     <hr>
                     <div class="mb-3">
                         <div class="btn-group float-end" role="group" >
@@ -147,6 +149,13 @@
                     this.headerTitle = header;
                 },
 
+                createTeamForm() {
+                    this.openForm();
+                    this.initFormData();
+                    this.editData = false;
+                    console.log(!this.editData);
+                },
+
                 closeForm() {
                     this.showList = true;
                     this.showForm = false;
@@ -154,9 +163,10 @@
                 },
 
                 initFormData(team = null) {
-                    this.formData.name = teamteam.name;
-                    this.formData.country = team.country;
-                    this.formData.acountBalance = team.acountBalance;
+                    this.formData.name = team? team.name : '';
+                    this.formData.country = team? team.country : '';
+                    this.formData.acountBalance = team? team.acountBalance : '';
+                    this.formData.players = [];
 
                     this.editData = false;
                 },
@@ -167,6 +177,7 @@
                     this.editId = teamId;
                     this.initFormData(team);
                     this.editData = true;
+                    console.log(!this.editData);
                 },
 
                 addPlayer() {

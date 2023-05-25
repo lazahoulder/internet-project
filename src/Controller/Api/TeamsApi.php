@@ -74,6 +74,7 @@ class TeamsApi extends BaseApiController
         Team $team,
         TeamInputHandler $handler,
         ValidatorInterface $validator,
+        TeamOutputHandler $outputHandler
     ): Response
     {
         /** @var TeamInput $input */
@@ -84,7 +85,7 @@ class TeamsApi extends BaseApiController
         }
         $team = $handler->handle($input, $team);
 
-        return $this->json($team, Response::HTTP_OK);
+        return $this->json($outputHandler->normalize($team), Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'api_team_delete', methods: ['DELETE'])]
@@ -95,5 +96,29 @@ class TeamsApi extends BaseApiController
         $response->setStatusCode(Response::HTTP_NO_CONTENT);
 
         return $response;
+    }
+
+    #[Route('/{id}/player', name: 'api_team_add_player', methods: ['POST'])]
+    public function addPlayer(Request $request, Team $team)
+    {
+
+    }
+
+    #[Route('/{id}/player', name: 'api_team_edit_player', methods: ['PUT'])]
+    public function editPlayer(Request $request, Team $team)
+    {
+
+    }
+
+    #[Route('/{id}/player', name: 'api_team_ell_player', methods: ['PATCH'])]
+    public function sellPlayer(Request $request, Team $team)
+    {
+
+    }
+
+    #[Route('/{id}/player', name: 'api_team_remove_player', methods: ['DELETE'])]
+    public function deletePlayer(Request $request, Team $team)
+    {
+
     }
 }

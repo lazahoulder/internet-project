@@ -11,4 +11,8 @@ class TeamInput
     public string $country;
     #[Assert\NotBlank]
     public float $acountBalance;
+    /**
+     * @var PlayerInput[]
+     */
+    public array $players;
 }
