@@ -1,52 +1,84 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<div class="conainer" x-data="team()">
+<div class="container" x-data="team()">
     <div class="row">
-        <div class="col-sm-3">Name: {{ team.name }}</div>
-        <div class="col-sm-3">Country: {{ team.country }}</span></div>
-        <div class="col-sm-3">Active players: <span x-text="countActivePlayers"></span></div>
+        <div class="col-sm-12">
+            <h3>Team</h3>
+        </div>
     </div>
+    <hr>
     <div class="row">
-        <table class="table" >
-            <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Surname</th>
-                <th scope="col">Value</th>
-                <th scope="col">Active bids</th>
-                <th scope="col">Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <template x-for="player in players">
+        <div class="col-sm-4">
+            <h6><strong>Name:</strong> {{ team.name }}</h6>
+        </div>
+        <div class="col-sm-4">
+            <h6 class="text-center"><strong>Country:</strong> {{ team.country }}</h6>
+        </div>
+        <div class="col-sm-4">
+            <h6 class="float-end"><strong>Active players:</strong>&nbsp;<span x-text="countActivePlayers"></span></h6>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-6">
+            <h5>Players</h5>
+        </div>
+        <div class="col-sm-6">
+            <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
+                <button type="button" class="btn btn-outline-primary">
+                    <i class="fa fa-plus"></i>
+                    &nbsp;New player
+                </button>
+                <button type="button" class="btn btn-outline-primary">
+                    <i class="fa fa-shopping-cart"></i>
+                    &nbsp;Buy Player
+                </button>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table" >
+                <thead>
                 <tr>
-                    <td x-text="player.player.name"></td>
-                    <td x-text="player.player.surname"></td>
-                    <td x-text="player.amountValue"></td>
-                    <td x-text="player.countActiveBid"></td>
-                    <td class="text-right">
-                    </td>
+                    <th scope="col">Name</th>
+                    <th scope="col">Surname</th>
+                    <th scope="col">Value</th>
+                    <th scope="col">Active bids</th>
+                    <th scope="col">Action</th>
                 </tr>
-            </template>
-            <template x-if="players.length === 0">
-                <tr>
-                    <td colspan="4">
-                        <div class="alert alert-info">
-                            There is no players in this team please add new :)
-                        </div>
-                    </td>
-                </tr>
-            </template>
-            </tbody>
+                </thead>
+                <tbody>
+                <template x-for="player in players">
+                    <tr>
+                        <td x-text="player.player.name"></td>
+                        <td x-text="player.player.surname"></td>
+                        <td x-text="player.amountValue"></td>
+                        <td x-text="player.countActiveBid"></td>
+                        <td class="text-right">
+                        </td>
+                    </tr>
+                </template>
+                <template x-if="players.length === 0">
+                    <tr>
+                        <td colspan="5">
+                            <div class="alert alert-info text-center">
+                                There is no players in this team please add new :)
+                            </div>
+                        </td>
+                    </tr>
+                </template>
+                </tbody>
 
-        </table>
+            </table>
+        </div>
     </div>
 </div>
     <script type="application/javascript">
         function team() {
             return {
-                teamId: {{ team.id }},
                 players: [],
                 name: '{{ team.name }}',
                 country: '{{ team.country }}',

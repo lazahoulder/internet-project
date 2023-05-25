@@ -76,11 +76,44 @@
                         <input type="text" class="form-control" id="balanceInput" x-model="formData.acountBalance">
                         <div x-show="isNaN(formData.acountBalance)" class="form-text text-danger">This value is not valid</div>
                     </div>
-                    <button class="btn btn-primary" @click.prevent="closeForm()">
-                        <i class="fa fa-close"></i>
-                        &nbsp;Cancel
-                    </button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <hr>
+                    <div class="mb-3">
+                            <button class="btn btn-outline-primary" @click.prevent="addPlayer()">
+                                <i class="fa fa-users"></i>
+                                &nbsp;Add player
+                            </button>
+                    </div>
+                    <template x-for="(player, index) in formData.players" :key="index">
+                        <div class="col-sm-12">
+                            <div class="mb-3">
+                                <input type="text" placeholder="Name" class="form-control" id="balanceInput" x-model="player.name">
+                            </div>
+                            <div class="mb-3">
+                                <input type="text" placeholder="Surname" class="form-control" id="balanceInput" x-model="player.surname">
+                            </div>
+                            <div class="mb-3">
+                                <input type="number" placeholder="Value" class="form-control" id="balanceInput" x-model="player.value">
+                            </div>
+                            <div class="mb-3">
+                                <button class="btn btn-xs btn-outline-danger" @click.prevent="removePlayer(index)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                    <hr>
+                    <div class="mb-3">
+                        <div class="btn-group float-end" role="group" >
+                            <button class="btn btn-xs btn-outline-danger" @click.prevent="closeForm()">
+                                <i class="fa fa-close"></i>
+                                &nbsp;Cancel
+                            </button>
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="fa fa-check"></i>
+                                &nbsp;Submit
+                            </button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -100,7 +133,9 @@
                     name: "",
                     country: "",
                     acountBalance: 0,
+                    players: [],
                 },
+                formValid: false,
 
                 showTeam(id) {
                     window.location.href = this.baseUri+id;
@@ -132,6 +167,18 @@
                     this.editId = teamId;
                     this.initFormData(team);
                     this.editData = true;
+                },
+
+                addPlayer() {
+                    this.formData.players.push({
+                        name: '',
+                        surname: '',
+                        value: '',
+                    });
+                },
+
+                removePlayer(index) {
+                    this.formData.players.splice(index, 1);
                 },
 
                 async updateTeam() {
@@ -187,12 +234,9 @@
                         },
                         body: JSON.stringify(this.formData),
                     })
-                        .then(() => {
-                            this.closeForm();
-                            this.retrieveTeam();
-                        })
-                        .catch(() => {
-                            this.formMessage = "Something went wrong.";
+                        .then((response) => response.json())
+                        .then((response) => {
+                            this.showTeam(response.id);
                         });
                 },
             }

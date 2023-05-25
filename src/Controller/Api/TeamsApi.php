@@ -53,7 +53,8 @@ class TeamsApi extends BaseApiController
     public function createTeam(
         Request $request,
         TeamInputHandler $handler,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        TeamOutputHandler $outputHandler
     ): Response
     {
         /** @var TeamInput $input */
@@ -64,7 +65,7 @@ class TeamsApi extends BaseApiController
         }
         $team = $handler->handle($input);
 
-        return $this->json($team, Response::HTTP_CREATED);
+        return $this->json($outputHandler->normalize($team), Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'api_team_update', methods: ['PUT'])]

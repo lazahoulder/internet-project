@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\PlayerTeam;
+use App\Entity\PlayerTeamInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -39,28 +41,29 @@ class PlayerTeamRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return PlayerTeam[] Returns an array of PlayerTeam objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findByTeamQuery($teamId): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->join('p.team', 't')
+            ->andWhere('t.id = :val')
+            ->setParameter('val', $teamId)
+            ->andWhere($qb->expr()->neq('p.state', PlayerTeamInterface::INACTIVE_STATE))
+        ;
 
-//    public function findOneBySomeField($value): ?PlayerTeam
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $qb;
+    }
+
+    public function findPlayerQuery($teamId): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->join('p.team', 't')
+            ->andWhere('t.id = :val')
+            ->setParameter('val', $teamId)
+            ->andWhere($qb->expr()->neq('p.state', PlayerTeamInterface::INACTIVE_STATE))
+        ;
+
+        return $qb;
+    }
 }
