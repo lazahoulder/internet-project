@@ -48,7 +48,8 @@ class PlayerTeamRepository extends ServiceEntityRepository
             ->join('p.team', 't')
             ->andWhere('t.id = :val')
             ->setParameter('val', $teamId)
-            ->andWhere($qb->expr()->neq('p.state', PlayerTeamInterface::INACTIVE_STATE))
+            ->andWhere($qb->expr()->neq('p.state', ':state'))
+            ->setParameter('state', PlayerTeamInterface::INACTIVE_STATE)
         ;
 
         return $qb;

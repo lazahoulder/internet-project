@@ -9,7 +9,7 @@ use App\Repository\PlayerTeamRepository;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-class TeamOutputHandler
+class TeamOutputTranformer
 {
     public function __construct(
         private ObjectNormalizer $objectNormalizer,

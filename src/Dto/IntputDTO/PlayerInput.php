@@ -13,4 +13,6 @@ class PlayerInput
     public string $surname;
     public ?string $value;
     public ?DateTimeInterface $expectedEndDate;
+    public ?string $teamId = null;
+    public ?string $playerTeamId = null;
 }

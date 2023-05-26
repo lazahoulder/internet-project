@@ -27,11 +27,11 @@
             </div>
             <div class="col-sm-6" x-show="showList">
                 <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
-                    <button type="button" class="btn btn-outline-primary" @click="addPlayer()">
+                    <button type="button" class="btn btn-outline-dark" @click="addPlayer()">
                         <i class="fa fa-plus"></i>
                         &nbsp;New player
                     </button>
-                    <button type="button" class="btn btn-outline-primary">
+                    <button type="button" class="btn btn-outline-dark">
                         <i class="fa fa-shopping-cart"></i>
                         &nbsp;Buy Player
                     </button>
@@ -48,7 +48,7 @@
                         <th scope="col">Surname</th>
                         <th scope="col">Value</th>
                         <th scope="col">Active bids</th>
-                        <th scope="col">Action</th>
+                        <th scope="col" class="text-right" style="width: 10%">Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -59,6 +59,14 @@
                             <td x-text="player.amountValue"></td>
                             <td x-text="player.countActiveBid"></td>
                             <td class="text-right">
+                                <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
+                                    <button type="button" class="btn btn-outline-primary" @click="editPlayer(player.id)">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger" @click="removePlayer(player.id)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </template>
@@ -77,15 +85,18 @@
             </div>
         </div>
         <div class="row" x-show="showForm">
-            <form @submit.prevent="">
+            <form @submit.prevent="submitForm()">
                 <div class="mb-3">
-                    <input type="text" placeholder="Name" class="form-control" id="balanceInput" x-model="player.name">
+                    <input type="text" placeholder="Name" class="form-control" x-model="formData.name">
                 </div>
                 <div class="mb-3">
-                    <input type="text" placeholder="Surname" class="form-control" id="balanceInput" x-model="player.surname">
+                    <input type="text" placeholder="Surname" class="form-control" x-model="formData.surname">
                 </div>
                 <div class="mb-3">
-                    <input type="number" placeholder="Value" class="form-control" id="balanceInput" x-model="player.value">
+                    <input type="number" placeholder="Value" class="form-control" x-model="formData.value">
+                </div>
+                <div class="mb-3">
+                    <input type="date" placeholder="Excepted end data" class="form-control" x-model="formData.expectedEndDate">
                 </div>
                 <div class="mb-3">
                     <div class="btn-group float-end" role="group" >
@@ -108,13 +119,17 @@
                 teamId: '{{ team.id }}',
                 players: [],
                 countActivePlayers: '{{ team.countActivePlayers }}',
-                uri: '{{ path('api_team_read', {"id" : team.id}) }}',
+                uri: '{{ path('api_team_read', {"id" : team.id}) }}/players',
                 showList: true,
                 showForm: false,
-                player: {
+                editData: false,
+                editPlayerId: null,
+                actualPage: 1,
+                formData: {
                     name: '',
                     surname: '',
                     value: '',
+                    expectedEndDate: '',
                 },
 
                 closeForm() {
@@ -122,23 +137,55 @@
                     this.showForm = false;
                 },
 
-                async retrievePlayers(uri = this.uri) {
+                initFormData(playerTeam = null) {
+                    console.log(this.playerTeam);
+
+                    this.formData.name = playerTeam ? playerTeam.player.name : '';
+                    this.formData.surname = playerTeam ? playerTeam.player.surname : '';
+                    this.formData.value = playerTeam ? playerTeam.amountValue : '';
+                    this.formData.expectedEndDate = playerTeam ?
+                        new Date(playerTeam.expectedEndDate).toISOString().substring(0, 10) : '';
+                    console.log(this.formData);
+                },
+
+                async retrievePlayers(page = 1) {
+                    const params = new URLSearchParams({
+                        page: 1
+                    });
+                    let uri = this.uri + '?' + params.toString();
                     let response = await (await fetch(uri)).json();
-                    this.players = response.activePlayers;
-                    this.countActivePlayers = response.countActivePlayers;
+                    this.players = response.results;
+                    this.countActivePlayers = response.total;
                 },
 
                 init() {
                     this.retrievePlayers();
                 },
 
-                addPlayer() {
+                openForm() {
                     this.showList = false;
                     this.showForm = true;
                 },
 
-                editPlayer() {
+                addPlayer() {
+                    this.openForm();
+                    this.initFormData();
+                    this.editPlayerId = null;
+                },
 
+                editPlayer(id) {
+                    this.editPlayerId = id;
+                    this.openForm();
+                    let playerTeam = this.players.find(elt => elt.id === id);
+                    this.initFormData(playerTeam);
+                },
+
+                submitForm() {
+                    if (this.editPlayerId) {
+                        this.updatePlayer();
+                    } else {
+                        this.createPlayer();
+                    }
                 },
 
                 removePlayer() {
@@ -149,12 +196,44 @@
 
                 },
 
-                createPlayer() {
-
+                async createPlayer() {
+                    this.formData.expectedEndDate = this.formData.expectedEndDate === '' ?
+                        null : this.formData.expectedEndDate;
+                    this.formData.value = String(this.formData.value);
+                    console.log(this.formData);
+                    await fetch(this.uri, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    })
+                        .then(() => {
+                            this.retrievePlayers();
+                            this.closeForm();
+                        }).catch(() => {
+                            console.log('error');
+                        });
                 },
 
-                updatePlayer() {
-
+                async updatePlayer() {
+                    this.formData.expectedEndDate = this.formData.expectedEndDate === '' ?
+                        null : this.formData.expectedEndDate;
+                    this.formData.value = String(this.formData.value);
+                    let uri = this.uri + '/' + this.editPlayerId;
+                    await fetch(uri, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    })
+                        .then(() => {
+                            this.retrievePlayers();
+                            this.closeForm();
+                        });
                 },
             }
         }

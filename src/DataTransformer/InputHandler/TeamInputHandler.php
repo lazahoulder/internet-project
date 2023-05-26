@@ -19,7 +19,6 @@ class TeamInputHandler
         private EntityManagerInterface $manager,
     )
     {
-
     }
 
     public function handle(TeamInput $teamInput, ?Team $team = null): Team|ConstraintViolationListInterface

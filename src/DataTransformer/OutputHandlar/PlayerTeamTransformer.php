@@ -2,6 +2,7 @@
 
 namespace App\DataTransformer\OutputHandlar;
 
+use App\Entity\PlayerTeam;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class PlayerTeamTransformer
@@ -20,5 +21,10 @@ class PlayerTeamTransformer
         }
 
         return $data;
+    }
+
+    public function normalize(PlayerTeam $playerTeam)
+    {
+        return $this->objectNormalizer->normalize($playerTeam, null, ['groups' => 'team_show']);
     }
 }
