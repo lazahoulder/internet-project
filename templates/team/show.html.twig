@@ -87,10 +87,13 @@
         <div class="row" x-show="showForm">
             <form @submit.prevent="submitForm()">
                 <div class="mb-3">
-                    <input type="text" placeholder="Name" class="form-control" x-model="formData.name">
+                    <input type="text" placeholder="Name" class="form-control" :class="formError.name.length > 0 ? 'is-invalid' : ''" x-model="formData.name">
+                    <div class="invalid-feedback" x-text="formError.name.join()"></div>
                 </div>
+                <span class=""></span>
                 <div class="mb-3">
-                    <input type="text" placeholder="Surname" class="form-control" x-model="formData.surname">
+                    <input type="text" placeholder="Surname" class="form-control" :class="formError.surname.length > 0 ? 'is-invalid' : ''" x-model="formData.surname">
+                    <div class="invalid-feedback" x-text="formError.surname.join()"></div>
                 </div>
                 <div class="mb-3">
                     <input type="number" placeholder="Value" class="form-control" x-model="formData.value">
@@ -132,6 +135,11 @@
                     expectedEndDate: '',
                 },
 
+                formError: {
+                    name: [],
+                    surname: [],
+                },
+
                 closeForm() {
                     this.showList = true;
                     this.showForm = false;
@@ -143,9 +151,12 @@
                     this.formData.name = playerTeam ? playerTeam.player.name : '';
                     this.formData.surname = playerTeam ? playerTeam.player.surname : '';
                     this.formData.value = playerTeam ? playerTeam.amountValue : '';
-                    this.formData.expectedEndDate = playerTeam ?
+                    this.formData.expectedEndDate = playerTeam && playerTeam.expectedEndDate ?
                         new Date(playerTeam.expectedEndDate).toISOString().substring(0, 10) : '';
-                    console.log(this.formData);
+                    this.formError = {
+                        name: [],
+                        surname: [],
+                    };
                 },
 
                 async retrievePlayers(page = 1) {
@@ -209,11 +220,19 @@
                         },
                         body: JSON.stringify(this.formData),
                     })
-                        .then(() => {
+                        .then((response) => {
+                            if (!response.ok) {
+                                let err = new Error("HTTP status code: " + response.status)
+                                err.response = response.json();
+                                err.status = response.status
+                                throw err
+                            }
                             this.retrievePlayers();
                             this.closeForm();
-                        }).catch(() => {
-                            console.log('error');
+                        }).catch((err) => {
+                            err.response.then((data) => {
+                                this.formError = data;
+                            });
                         });
                 },
 

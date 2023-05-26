@@ -182,7 +182,7 @@ class TeamsApi extends BaseApiController
         $errors = $validator->validate($input);
 
         if (count($errors)) {
-            return $this->json($errors->getIterator(), Response::HTTP_BAD_REQUEST);
+            return $this->handelError($errors);
         }
 
         try {
