@@ -2,7 +2,7 @@
 
 namespace App\DataTransformer\InputHandler;
 
-use App\Dto\IntputDTO\PlayerInput;
+use App\Dto\IntputDTO\PlayerTeamInput;
 use App\Dto\IntputDTO\TeamInput;
 use App\Entity\Player;
 use App\Entity\PlayerTeam;
@@ -34,7 +34,7 @@ class TeamInputHandler
 
         //dd($teamInput->players);
 
-        /** @var PlayerInput $playerInput */
+        /** @var PlayerTeamInput $playerInput */
         foreach ($teamInput->players as $playerInput) {
             $player = new Player();
             $player->setName($playerInput->name);

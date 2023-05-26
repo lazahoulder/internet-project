@@ -3,8 +3,11 @@
 namespace App\Repository;
 
 use App\Entity\Player;
+use App\Entity\PlayerTeamInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @extends ServiceEntityRepository<Player>
@@ -39,20 +42,20 @@ class PlayerRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Player[] Returns an array of Player objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findInactivePlayers(): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->leftJoin('p.playerTeams', 'pt')
+            ->andWhere('pt.state = :state')
+            ->setParameter('state', PlayerTeamInterface::ACTIVE_STATE)
+            ->orderBy('p.id', 'ASC')
+            ->groupBy('p.id')
+            ->having($qb->expr()->eq($qb->expr()->count('p'), 0))
+        ;
+
+        return $qb;
+    }
 
 //    public function findOneBySomeField($value): ?Player
 //    {

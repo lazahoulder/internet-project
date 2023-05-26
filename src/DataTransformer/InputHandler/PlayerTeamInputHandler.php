@@ -2,7 +2,7 @@
 
 namespace App\DataTransformer\InputHandler;
 
-use App\Dto\IntputDTO\PlayerInput;
+use App\Dto\IntputDTO\PlayerTeamInput;
 use App\Entity\Player;
 use App\Entity\PlayerTeam;
 use App\Entity\PlayerTeamInterface;
@@ -21,7 +21,7 @@ class PlayerTeamInputHandler
     {
     }
 
-    public function handle(PlayerInput $playerInput) : PlayerTeamInterface
+    public function handle(PlayerTeamInput $playerInput) : PlayerTeamInterface
     {
         $team = $this->teamRepository->find($playerInput->teamId);
 

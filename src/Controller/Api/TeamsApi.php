@@ -6,7 +6,7 @@ use App\DataTransformer\InputHandler\PlayerTeamInputHandler;
 use App\DataTransformer\InputHandler\TeamInputHandler;
 use App\DataTransformer\OutputHandlar\PlayerTeamTransformer;
 use App\DataTransformer\OutputHandlar\TeamOutputTranformer;
-use App\Dto\IntputDTO\PlayerInput;
+use App\Dto\IntputDTO\PlayerTeamInput;
 use App\Dto\IntputDTO\TeamInput;
 use App\Entity\Player;
 use App\Entity\Team;
@@ -41,13 +41,15 @@ class TeamsApi extends BaseApiController
             $this->repository->findAllQB(),
             (int)$request->get('page', 1)
         );
-        $data = [
-            'results' => $outputHandler->listNormalize($pagination->getItems()),
-            'page' => $pagination->getCurrentPageNumber(),
-            'pageNumber' => ceil($pagination->getTotalItemCount() / $pagination->getItemNumberPerPage()),
-        ];
+        $data = $this->handleListData($outputHandler, $pagination);
 
         return $this->json($data, Response::HTTP_OK);
+    }
+
+    #[Route('/light/list', name: 'api_team_light_list', methods: ['GET'])]
+    public function lightList(): JsonResponse
+    {
+        return $this->json($this->repository->findAllLight(), Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'api_team_read', methods: ['GET'])]
@@ -68,7 +70,7 @@ class TeamsApi extends BaseApiController
         $input = $this->serializer->deserialize($request->getContent(), TeamInput::class, 'json');
         $errors = $validator->validate($input);
         if (count($errors)) {
-            return $this->json($errors, Response::HTTP_BAD_REQUEST);
+            return $this->handelError($errors);
         }
         $team = $handler->handle($input);
 
@@ -113,12 +115,7 @@ class TeamsApi extends BaseApiController
             (int)$request->get('page', 1)
         );
 
-        $data = [
-            'results' => $this->playerTeamTransformer->listNormalize($pagination->getItems()),
-            'page' => $pagination->getCurrentPageNumber(),
-            'pageNumber' => ceil($pagination->getTotalItemCount() / $pagination->getItemNumberPerPage()),
-            'total' => $pagination->getTotalItemCount(),
-        ];
+        $data = $this->handleListData($this->playerTeamTransformer, $pagination);
 
         return $this->json($data, Response::HTTP_OK);
     }
@@ -131,8 +128,8 @@ class TeamsApi extends BaseApiController
         PlayerTeamInputHandler $playerTeamInputHandler,
     ): JsonResponse
     {
-        /** @var PlayerInput $input */
-        $input = $this->serializer->deserialize($request->getContent(), PlayerInput::class, 'json');
+        /** @var PlayerTeamInput $input */
+        $input = $this->serializer->deserialize($request->getContent(), PlayerTeamInput::class, 'json');
         $input->teamId = $id;
 
         return $this->handlePlayerInput($validator, $input, $playerTeamInputHandler);
@@ -147,8 +144,8 @@ class TeamsApi extends BaseApiController
         PlayerTeamInputHandler $playerTeamInputHandler,
     ): JsonResponse
     {
-        /** @var PlayerInput $input */
-        $input = $this->serializer->deserialize($request->getContent(), PlayerInput::class, 'json');
+        /** @var PlayerTeamInput $input */
+        $input = $this->serializer->deserialize($request->getContent(), PlayerTeamInput::class, 'json');
         $input->teamId = $id;
         $input->playerTeamId = $playerId;
 
@@ -169,13 +166,13 @@ class TeamsApi extends BaseApiController
 
     /**
      * @param ValidatorInterface $validator
-     * @param PlayerInput $input
+     * @param PlayerTeamInput $input
      * @param PlayerTeamInputHandler $playerTeamInputHandler
      * @return JsonResponse
      */
     private function handlePlayerInput(
-        ValidatorInterface $validator,
-        PlayerInput $input,
+        ValidatorInterface     $validator,
+        PlayerTeamInput        $input,
         PlayerTeamInputHandler $playerTeamInputHandler
     ): JsonResponse
     {

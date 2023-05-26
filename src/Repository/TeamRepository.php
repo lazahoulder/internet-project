@@ -67,4 +67,14 @@ class TeamRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('t');
     }
+
+    public function findAllLight()
+    {
+        return $this->createQueryBuilder('t')
+            ->select('t.id')
+            ->addSelect('t.name')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 }

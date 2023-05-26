@@ -64,7 +64,7 @@
                                         <i class="fa fa-pencil"></i>
                                     </button>
                                     <button type="button" class="btn btn-outline-danger" @click="removePlayer(player.id)">
-                                        <i class="fa fa-trash"></i>
+                                        <i class="fas fa-user-alt-slash"></i>
                                     </button>
                                 </div>
                             </td>
@@ -82,21 +82,41 @@
                     </tbody>
 
                 </table>
+                <nav aria-label="Page navigation example" x-show="pages > 1">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" :class="{ 'disabled': actualPage === 1 }">
+                            <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage-1)" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <template x-for="pageNumber in pages" :key="pageNumber">
+                            <li class="page-item" :class="{ 'active': actualPage === pageNumber }">
+                                <a class="page-link" href="#" x-text="pageNumber" x-on:click.prevent="retrievePlayers(pageNumber)"></a>
+                            </li>
+
+                        </template>
+                        <li class="page-item" :class="{ 'disabled': actualPage === pages }">
+                            <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage+1)" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
         <div class="row" x-show="showForm">
             <form @submit.prevent="submitForm()">
                 <div class="mb-3">
-                    <input type="text" placeholder="Name" class="form-control" :class="formError.name.length > 0 ? 'is-invalid' : ''" x-model="formData.name">
-                    <div class="invalid-feedback" x-text="formError.name.join()"></div>
+                    <input type="text" placeholder="Name" class="form-control" :class="formError.name !== '' ? 'is-invalid' : ''" x-model="formData.name">
+                    <div class="invalid-feedback" x-text="formError.name"></div>
                 </div>
                 <span class=""></span>
                 <div class="mb-3">
-                    <input type="text" placeholder="Surname" class="form-control" :class="formError.surname.length > 0 ? 'is-invalid' : ''" x-model="formData.surname">
-                    <div class="invalid-feedback" x-text="formError.surname.join()"></div>
+                    <input type="text" placeholder="Surname" class="form-control" :class="formError.surname !== '' ? 'is-invalid' : ''" x-model="formData.surname">
+                    <div class="invalid-feedback" x-text="formError.surname"></div>
                 </div>
                 <div class="mb-3">
-                    <input type="number" placeholder="Value" class="form-control" x-model="formData.value">
+                    <input type="number" placeholder="Value" class="form-control" x-model.number="formData.value">
                 </div>
                 <div class="mb-3">
                     <input type="date" placeholder="Excepted end data" class="form-control" x-model="formData.expectedEndDate">
@@ -128,6 +148,7 @@
                 editData: false,
                 editPlayerId: null,
                 actualPage: 1,
+                pages: 0,
                 formData: {
                     name: '',
                     surname: '',
@@ -154,19 +175,21 @@
                     this.formData.expectedEndDate = playerTeam && playerTeam.expectedEndDate ?
                         new Date(playerTeam.expectedEndDate).toISOString().substring(0, 10) : '';
                     this.formError = {
-                        name: [],
-                        surname: [],
+                        name: '',
+                        surname: '',
                     };
                 },
 
-                async retrievePlayers(page = 1) {
+                async retrievePlayers(page = this.actualPage) {
                     const params = new URLSearchParams({
-                        page: 1
+                        page: page
                     });
                     let uri = this.uri + '?' + params.toString();
                     let response = await (await fetch(uri)).json();
                     this.players = response.results;
                     this.countActivePlayers = response.total;
+                    this.actualPage = page;
+                    this.pages = response.pageNumber;
                 },
 
                 init() {
@@ -210,7 +233,6 @@
                 async createPlayer() {
                     this.formData.expectedEndDate = this.formData.expectedEndDate === '' ?
                         null : this.formData.expectedEndDate;
-                    this.formData.value = String(this.formData.value);
                     console.log(this.formData);
                     await fetch(this.uri, {
                         method: "POST",
@@ -239,7 +261,6 @@
                 async updatePlayer() {
                     this.formData.expectedEndDate = this.formData.expectedEndDate === '' ?
                         null : this.formData.expectedEndDate;
-                    this.formData.value = String(this.formData.value);
                     let uri = this.uri + '/' + this.editPlayerId;
                     await fetch(uri, {
                         method: "PUT",
@@ -249,7 +270,13 @@
                         },
                         body: JSON.stringify(this.formData),
                     })
-                        .then(() => {
+                        .then((response) => {
+                            if (!response.ok) {
+                                let err = new Error("HTTP status code: " + response.status)
+                                err.response = response.json();
+                                err.status = response.status
+                                throw err
+                            }
                             this.retrievePlayers();
                             this.closeForm();
                         });

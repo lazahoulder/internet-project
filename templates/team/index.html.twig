@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="row" x-show="showList">
-            <table class="table" >
+            <table class="table">
                 <thead>
                 <tr>
                     <th scope="col">Name</th>
@@ -59,41 +59,76 @@
                 </tbody>
 
             </table>
+            <nav aria-label="Page navigation example" x-show="pages > 1">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" :class="{ 'disabled': actualPage === 1 }">
+                        <a class="page-link" href="#" x-on:click.prevent="retrieveTeam(actualPage-1)" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <template x-for="pageNumber in pages" :key="pageNumber">
+                            <li class="page-item" :class="{ 'active': actualPage === pageNumber }">
+                                <a class="page-link" href="#" x-text="pageNumber" x-on:click.prevent="retrieveTeam(pageNumber)"></a>
+                            </li>
+
+                    </template>
+                    <li class="page-item" :class="{ 'disabled': actualPage === pages }">
+                        <a class="page-link" href="#" x-on:click.prevent="retrieveTeam(actualPage+1)" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
         <div class="row" x-show="showForm">
             <div class="col-sm-12">
                 <form @submit.prevent="submitForm()">
                     <div class="mb-3">
                         <label for="nameInput" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="nameInput" x-model="formData.name">
+                        <input type="text" class="form-control" :class="formError.name !== '' ? 'is-invalid' : ''"
+                               id="nameInput" x-model="formData.name">
+                        <div class="invalid-feedback" x-text="formError.name"></div>
                     </div>
                     <div class="mb-3">
                         <label for="countryInput" class="form-label">Country</label>
-                        <input type="text" class="form-control" id="countryInput" x-model="formData.country">
+                        <input type="text" class="form-control" id="countryInput"
+                               :class="formError.country !== '' ? 'is-invalid' : ''" x-model="formData.country">
+                        <div class="invalid-feedback" x-text="formError.country"></div>
                     </div>
                     <div class="mb-3">
                         <label for="balanceInput" class="form-label">Balance</label>
-                        <input type="text" class="form-control" id="balanceInput" x-model="formData.acountBalance">
-                        <div x-show="isNaN(formData.acountBalance)" class="form-text text-danger">This value is not valid</div>
+                        <input type="number" class="form-control" id="balanceInput"
+                               :class="formError.acountBalance !== '' ? 'is-invalid' : ''"
+                               x-model.number="formData.acountBalance">
+                        <div class="invalid-feedback" x-text="formError.acountBalance"></div>
                     </div>
                     <div class="mb-3" x-show="!editData">
                         <hr>
-                            <button class="btn btn-outline-primary" @click.prevent="addPlayer()">
-                                <i class="fa fa-users"></i>
-                                &nbsp;Add player
-                            </button>
+                        <button class="btn btn-outline-primary" @click.prevent="addPlayer()">
+                            <i class="fa fa-users"></i>
+                            &nbsp;Add player
+                        </button>
                     </div>
                     <div class="row" x-show="!editData">
                         <template x-for="(player, index) in formData.players" :key="index">
                             <div class="col-sm-3">
                                 <div class="mb-3">
-                                    <input type="text" placeholder="Name" class="form-control" id="balanceInput" x-model="player.name">
+                                    <input type="text" placeholder="Name" class="form-control"
+                                           :class="formError.players[index].name !== '' ? 'is-invalid' : ''"
+                                           id="balanceInput"
+                                           x-model="player.name">
+                                    <div class="invalid-feedback" x-text="formError.players[index].name"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <input type="text" placeholder="Surname" class="form-control" id="balanceInput" x-model="player.surname">
+                                    <input type="text" placeholder="Surname" class="form-control"
+                                           :class="formError.players[index].surname !== '' ? 'is-invalid' : ''"
+                                           id="balanceInput"
+                                           x-model="player.surname">
+                                    <div class="invalid-feedback" x-text="formError.players[index].surname"></div>
                                 </div>
                                 <div class="mb-3">
-                                    <input type="number" placeholder="Value" class="form-control" id="balanceInput" x-model="player.value">
+                                    <input type="number" placeholder="Value" class="form-control" id="balanceInput"
+                                           x-model.number="player.value">
                                 </div>
                                 <div class="mb-3">
                                     <button class="btn btn-xs btn-outline-danger" @click.prevent="removePlayer(index)">
@@ -105,7 +140,7 @@
                     </div>
                     <hr>
                     <div class="mb-3">
-                        <div class="btn-group float-end" role="group" >
+                        <div class="btn-group float-end" role="group">
                             <button class="btn btn-xs btn-outline-danger" @click.prevent="closeForm()">
                                 <i class="fa fa-close"></i>
                                 &nbsp;Cancel
@@ -124,11 +159,13 @@
         function teams() {
             return {
                 teams: [],
+                actualPage: 1,
+                pages: 0,
                 showList: true,
                 headerTitle: 'Teams',
                 uri: '{{ path('api_team_list') }}',
                 baseUri: '{{ path('app_team_index') }}',
-                showForm:false,
+                showForm: false,
                 editData: false,
                 editId: null,
                 formData: {
@@ -137,10 +174,17 @@
                     acountBalance: 0,
                     players: [],
                 },
+                formError: {
+                    name: "",
+                    country: "",
+                    acountBalance: "",
+                    players: [],
+                },
+
                 formValid: false,
 
                 showTeam(id) {
-                    window.location.href = this.baseUri+id;
+                    window.location.href = this.baseUri + id;
                 },
 
                 openForm(header = 'New team') {
@@ -163,9 +207,9 @@
                 },
 
                 initFormData(team = null) {
-                    this.formData.name = team? team.name : '';
-                    this.formData.country = team? team.country : '';
-                    this.formData.acountBalance = team? team.acountBalance : '';
+                    this.formData.name = team ? team.name : '';
+                    this.formData.country = team ? team.country : '';
+                    this.formData.acountBalance = team ? team.acountBalance : 0;
                     this.formData.players = [];
 
                     this.editData = false;
@@ -193,8 +237,7 @@
                 },
 
                 async updateTeam() {
-                    this.formData.acountBalance = parseInt(this.formData.acountBalance);
-                    let uri = this.uri+this.editId;
+                    let uri = this.uri + this.editId;
                     await fetch(uri, {
                         method: "PUT",
                         headers: {
@@ -202,14 +245,23 @@
                             Accept: "application/json",
                         },
                         body: JSON.stringify(this.formData),
-                    })
-                        .then(() => {
-                            this.closeForm();
-                            this.retrieveTeam();
-                        })
-                        .catch(() => {
-                            this.formMessage = "Something went wrong.";
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+
+                        return response.json();
+                    }).then((response) => {
+                        this.showTeam(response.id);
+                    }).catch((err) => {
+                        console.log(err);
+                        err.response.then((data) => {
+                            this.formError = data;
                         });
+                    });
                 },
 
                 submitForm() {
@@ -220,9 +272,15 @@
                     }
                 },
 
-                async retrieveTeam(uri = this.uri) {
+                async retrieveTeam(page = this.actualPage) {
+                    const params = new URLSearchParams({
+                        page: page
+                    });
+                    let uri = this.uri + '?' + params.toString();
                     let response = await (await fetch(uri)).json();
                     this.teams = response.results;
+                    this.actualPage = page;
+                    this.pages = response.pageNumber;
                 },
 
                 async removeTeam(teamId) {
@@ -236,7 +294,6 @@
                 },
 
                 async addTeam() {
-                    this.formData.acountBalance = parseInt(this.formData.acountBalance);
                     await fetch(this.uri, {
                         method: "POST",
                         headers: {
@@ -244,11 +301,23 @@
                             Accept: "application/json",
                         },
                         body: JSON.stringify(this.formData),
-                    })
-                        .then((response) => response.json())
-                        .then((response) => {
-                            this.showTeam(response.id);
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+
+                        return response.json();
+                    }).then((response) => {
+                        this.showTeam(response.id);
+                    }).catch((err) => {
+                        console.log(err);
+                        err.response.then((data) => {
+                            this.formError = data;
                         });
+                    });
                 },
             }
         }

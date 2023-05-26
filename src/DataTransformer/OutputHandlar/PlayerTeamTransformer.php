@@ -5,7 +5,7 @@ namespace App\DataTransformer\OutputHandlar;
 use App\Entity\PlayerTeam;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-class PlayerTeamTransformer
+class PlayerTeamTransformer implements OutputTransformerInterface
 {
     public function __construct(
         private ObjectNormalizer $objectNormalizer,
@@ -23,7 +23,7 @@ class PlayerTeamTransformer
         return $data;
     }
 
-    public function normalize(PlayerTeam $playerTeam)
+    public function normalize($playerTeam)
     {
         return $this->objectNormalizer->normalize($playerTeam, null, ['groups' => 'team_show']);
     }
