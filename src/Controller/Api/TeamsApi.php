@@ -4,14 +4,14 @@ namespace App\Controller\Api;
 
 use App\DataTransformer\InputHandler\PlayerTeamInputHandler;
 use App\DataTransformer\InputHandler\TeamInputHandler;
-use App\DataTransformer\OutputHandlar\PlayerTeamTransformer;
-use App\DataTransformer\OutputHandlar\TeamOutputTranformer;
+use App\DataTransformer\OutputHandler\PlayerTeamTransformer;
+use App\DataTransformer\OutputHandler\TeamOutputTranformer;
 use App\Dto\IntputDTO\PlayerTeamInput;
 use App\Dto\IntputDTO\TeamInput;
-use App\Entity\Player;
 use App\Entity\Team;
 use App\Repository\PlayerTeamRepository;
 use App\Repository\TeamRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,15 +23,17 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('api/team')]
 class TeamsApi extends BaseApiController
 {
+    use HasInputHandlerTrait;
+
     public function __construct(
         SerializerInterface           $serializer,
         private TeamRepository        $repository,
-        private PaginatorInterface    $paginator,
+        PaginatorInterface            $paginator,
         private PlayerTeamRepository  $playerTeamRepository,
         private PlayerTeamTransformer $playerTeamTransformer,
     )
     {
-        parent::__construct($serializer);
+        parent::__construct($serializer, $paginator);
     }
 
     #[Route('/', name: 'api_team_list', methods: ['GET'])]
@@ -68,19 +70,14 @@ class TeamsApi extends BaseApiController
     {
         /** @var TeamInput $input */
         $input = $this->serializer->deserialize($request->getContent(), TeamInput::class, 'json');
-        $errors = $validator->validate($input);
-        if (count($errors)) {
-            return $this->handelError($errors);
-        }
-        $team = $handler->handle($input);
 
-        return $this->json($outputHandler->normalize($team), Response::HTTP_CREATED);
+        return $this->handleInput($validator, $input, $handler, $outputHandler, Response::HTTP_CREATED);
     }
 
     #[Route('/{id}', name: 'api_team_update', methods: ['PUT'])]
     public function updateTeam(
         Request              $request,
-        Team                 $team,
+        string               $id,
         TeamInputHandler     $handler,
         ValidatorInterface   $validator,
         TeamOutputTranformer $outputHandler
@@ -88,13 +85,10 @@ class TeamsApi extends BaseApiController
     {
         /** @var TeamInput $input */
         $input = $this->serializer->deserialize($request->getContent(), TeamInput::class, 'json');
-        $errors = $validator->validate($input);
-        if (count($errors)) {
-            return $this->json($errors, Response::HTTP_BAD_REQUEST);
-        }
-        $team = $handler->handle($input, $team);
+        $input->teamId = $id;
 
-        return $this->json($outputHandler->normalize($team), Response::HTTP_OK);
+
+        return $this->handleInput($validator, $input, $handler, $outputHandler, Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'api_team_delete', methods: ['DELETE'])]
@@ -107,18 +101,6 @@ class TeamsApi extends BaseApiController
         return $response;
     }
 
-    #[Route('/{id}/players', name: 'api_team_list_player', methods: ['GET'])]
-    public function listPlayer(Request $request, string $id)
-    {
-        $pagination = $this->paginator->paginate(
-            $this->playerTeamRepository->findByTeamQuery($id),
-            (int)$request->get('page', 1)
-        );
-
-        $data = $this->handleListData($this->playerTeamTransformer, $pagination);
-
-        return $this->json($data, Response::HTTP_OK);
-    }
 
     #[Route('/{id}/players', name: 'api_team_add_player', methods: ['POST'])]
     public function addPlayer(
@@ -126,13 +108,14 @@ class TeamsApi extends BaseApiController
         string                 $id,
         ValidatorInterface     $validator,
         PlayerTeamInputHandler $playerTeamInputHandler,
+        PlayerTeamTransformer  $playerTeamTransformer,
     ): JsonResponse
     {
         /** @var PlayerTeamInput $input */
         $input = $this->serializer->deserialize($request->getContent(), PlayerTeamInput::class, 'json');
         $input->teamId = $id;
 
-        return $this->handlePlayerInput($validator, $input, $playerTeamInputHandler);
+        return $this->handleInput($validator, $input, $playerTeamInputHandler, $playerTeamTransformer);
     }
 
     #[Route('/{id}/players/{playerId}', name: 'api_team_edit_player', methods: ['PUT'])]
@@ -142,6 +125,7 @@ class TeamsApi extends BaseApiController
         string                 $playerId,
         ValidatorInterface     $validator,
         PlayerTeamInputHandler $playerTeamInputHandler,
+        PlayerTeamTransformer  $playerTeamTransformer,
     ): JsonResponse
     {
         /** @var PlayerTeamInput $input */
@@ -149,53 +133,12 @@ class TeamsApi extends BaseApiController
         $input->teamId = $id;
         $input->playerTeamId = $playerId;
 
-        return $this->handlePlayerInput($validator, $input, $playerTeamInputHandler);
+        return $this->handleInput($validator, $input, $playerTeamInputHandler, $playerTeamTransformer);
     }
 
     #[Route('/{id}/players/{playerId}', name: 'api_team_ell_player', methods: ['PATCH'])]
     public function sellPlayer(Request $request, Team $team)
     {
 
-    }
-
-    #[Route('/{id}/players/{playerId}', name: 'api_team_remove_player', methods: ['DELETE'])]
-    public function deletePlayer(Request $request, Team $team)
-    {
-
-    }
-
-    /**
-     * @param ValidatorInterface $validator
-     * @param PlayerTeamInput $input
-     * @param PlayerTeamInputHandler $playerTeamInputHandler
-     * @return JsonResponse
-     */
-    private function handlePlayerInput(
-        ValidatorInterface     $validator,
-        PlayerTeamInput        $input,
-        PlayerTeamInputHandler $playerTeamInputHandler
-    ): JsonResponse
-    {
-        $errors = $validator->validate($input);
-
-        if (count($errors)) {
-            return $this->handelError($errors);
-        }
-
-        try {
-            $playerTeam = $playerTeamInputHandler->handle($input);
-        } catch (\Exception $e) {
-            return $this->json(
-                [
-                    'message' => $e->getMessage()
-                ],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-
-        return $this->json(
-            $this->playerTeamTransformer->normalize($playerTeam),
-            Response::HTTP_CREATED
-        );
     }
 }

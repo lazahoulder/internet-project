@@ -67,4 +67,23 @@ class PlayerTeamRepository extends ServiceEntityRepository
 
         return $qb;
     }
+
+    public function findActivePlayersQb($teamId = null): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->join('p.team', 't')
+            ->andWhere($qb->expr()->neq('p.state', ':inactiveState'))
+            ->setParameter('inactiveState',PlayerTeamInterface::INACTIVE_STATE)
+        ;
+
+        if ($teamId) {
+            $qb
+                ->andWhere('t.id = :val')
+                ->setParameter('val', $teamId)
+            ;
+        }
+
+        return $qb;
+    }
 }

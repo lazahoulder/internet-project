@@ -27,7 +27,9 @@ interface PlayerInterface
 
     public function getActualActiveStatus() : ?PlayerTeamInterface;
 
-    public function getActualTeam(): TeamInterface;
+    public function getActualTeam(): ?TeamInterface;
 
     public function getActualValue() : ?float;
+
+    public function isActive(): bool;
 }

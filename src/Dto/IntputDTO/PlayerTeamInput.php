@@ -12,7 +12,7 @@ class PlayerTeamInput
     #[Assert\NotBlank]
     public string $surname;
     public ?float $value;
-    public ?DateTimeInterface $expectedEndDate;
+    public ?DateTimeInterface $expectedEndDate = null;
     public ?string $teamId = null;
     public ?string $playerTeamId = null;
 }

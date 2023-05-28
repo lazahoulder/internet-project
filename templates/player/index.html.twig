@@ -1,3 +1,5 @@
+{% set active = 'player' %}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Player index{% endblock %}
@@ -5,15 +7,15 @@
 {% block body %}
     <div class="container" x-data="playerPage()">
         <div class="row">
-            <div class="col-sm-9">
+            <div class="col-sm-6">
                 <h5 x-text="headerTitle"></h5>
             </div>
-            <dv class="col-sm-3">
-                <button class="btn btn-outline-dark" x-show="showList" @click="openForm()">
+            <div class="col-sm-6">
+                <button class="btn btn-sm btn-outline-dark float-end" x-show="showList" @click="openForm()">
                     <i class="fa fa-plus"></i>
                     &nbsp;Add new player
                 </button>
-            </dv>
+            </div>
         </div>
         <div class="row" x-show="showList">
             <ul class="nav nav-tabs">
@@ -29,10 +31,10 @@
                 </li>
             </ul>
             <div class="col-sm-12" x-show="showActive">
-                {{ inc }}
+                {% include 'player/active.html.twig' %}
             </div>
             <div class="col-sm-12" x-show="showInactive">
-                Inactive
+                {% include 'player/inactive.html.twig' %}
             </div>
         </div>
         <div class="row" x-show="showForm">
@@ -45,21 +47,22 @@
                         <div class="invalid-feedback" x-text="formError.name"></div>
                     </div>
                     <div class="mb-3">
-                        <label for="countryInput" class="form-label">Country</label>
-                        <input type="text" class="form-control" id="countryInput"
+                        <label for="surnameInput" class="form-label">Surname</label>
+                        <input type="text" class="form-control" id="surnameInput"
                                :class="formError.surname !== '' ? 'is-invalid' : ''" x-model="formData.surname">
                         <div class="invalid-feedback" x-text="formError.surname"></div>
                     </div>
-                    <div class="mb-3">
-                        <label for="balanceInput" class="form-label">Team</label>
-                        <select class="form-control" name="team" id="team" x-model="formData.teamId">
-                            <option > Select a team</option>
-                            <template x-for="team in teams">
-                                <option :value="team.id" x-text="team.name"></option>
-                            </template>
-                        </select>
-                        <p>Selected option: <span x-text="formData.teamId"></span></p>
-                    </div>
+                    <template x-if="editPlayerId === null">
+                        <div class="mb-3">
+                            <label for="team" class="form-label">Team</label>
+                            <select class="form-control" name="team" id="team" x-model="formData.teamId">
+                                <option > Select a team</option>
+                                <template x-for="team in teams">
+                                    <option :value="team.id" x-text="team.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </template>
                     <div class="mb-3">
                         <div class="btn-group float-end" role="group">
                             <button class="btn btn-xs btn-outline-danger" @click.prevent="closeForm()">
@@ -77,6 +80,8 @@
         </div>
     </div>
     <script type="application/ecmascript">
+        'use strict';
+
         function playerPage() {
             return {
                 showList: true,
@@ -86,6 +91,9 @@
                 headerTitle: 'All players',
                 teams: [],
                 teamsUri: '{{ path('api_team_light_list') }}',
+                playerUri: '{{ path('app_player_index') }}',
+                uri: '{{ path('api_players_list') }}',
+                editPlayerId: null,
                 formData: {
                     name: '',
                     surname: '',
@@ -96,10 +104,29 @@
                     surname: '',
                 },
 
+                initFormData(player = null) {
+                    this.formData.name = player ? player.name : '';
+                    this.formData.surname = player ? player.surname : '';
+                    this.formData.teamId = null;
+                },
+
                 openForm(header = 'New player') {
                     this.showList = false;
                     this.showForm = true;
                     this.headerTitle = header;
+                },
+
+                createPlayer() {
+                    this.editPlayerId = null;
+                    this.initFormData();
+                    this.openForm();
+                },
+
+                editPlayer(id) {
+                    this.editPlayerId = id;
+                    this.openForm('Edit Player');
+                    let playerTeam = this.players.find(elt => elt.player.id === id);
+                    this.initFormData(playerTeam.player);
                 },
 
                 closeForm(header = 'All players'){
@@ -119,14 +146,10 @@
                 submitForm() {
                     console.log(this.formData);
                     this.closeForm();
-                    if (this.formData.teamId) {
-                        const buttonElement = document.querySelector('[x-ref="active"]');
-                        buttonElement.click();
-                    } else {
-                        const buttonElement = document.querySelector('[x-ref="inactive"]');
-                        buttonElement.click();
-                    }
-                }
+                    let buttonElement = (this.formData.teamId) ?
+                        document.querySelector('[x-ref="active"]') : buttonElement = document.querySelector('[x-ref="inactive"]');
+                    buttonElement.click();
+                },
             }
         }
     </script>

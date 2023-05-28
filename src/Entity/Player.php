@@ -105,13 +105,18 @@ class Player implements PlayerInterface
         return $this->getActualActiveStatus()->getSellingValue() ?? $this->getActualActiveStatus()->getAmountValue();
     }
 
-    public function getActualTeam(): TeamInterface
+    public function getActualTeam(): ?TeamInterface
     {
-        return $this->getActualActiveStatus()->getTeam();
+        return $this->getActualActiveStatus()?->getTeam();
     }
 
     public function getCountActiveBids() : int
     {
         return $this->getActualActiveStatus()->getCountActiveBid();
+    }
+
+    public function isActive(): bool
+    {
+        return !is_null($this->getActualTeam());
     }
 }

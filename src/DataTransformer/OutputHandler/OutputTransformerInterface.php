@@ -1,12 +1,12 @@
 <?php
 
-namespace App\DataTransformer\OutputHandlar;
+namespace App\DataTransformer\OutputHandler;
 
 use App\Entity\Team;
 
 interface OutputTransformerInterface
 {
-    public function listNormalize(iterable $teams): array;
+    public function listNormalize(iterable $objects): array;
 
     /**
      * @param mixed $object

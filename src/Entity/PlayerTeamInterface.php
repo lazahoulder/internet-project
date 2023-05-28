@@ -29,11 +29,11 @@ interface PlayerTeamInterface
 
     public function getPlayer(): ?PlayerInterface;
 
-    public function setPlayer(?Player $player): PlayerTeamInterface;
+    public function setPlayer(?PlayerInterface $player): PlayerTeamInterface;
 
     public function getTeam(): ?TeamInterface;
 
-    public function setTeam(?Team $team): self;
+    public function setTeam(?TeamInterface $team): self;
 
     public function getSellingValue(): ?float;
 

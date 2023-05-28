@@ -1,3 +1,5 @@
+{% set active = 'home' %}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Hello IndexController!{% endblock %}
@@ -7,10 +9,15 @@
 <div class="container">
     <div class="row" >
         <div class="col-sm-12">
-            <h3>Recents bids</h3>
+            <h5>Recents bids</h5>
         </div>
         <div class="col-sm-12">
-            {% include('index/bids.html.twig') %}
+            {% set vars = {
+                playerTeamId: null,
+                maxValue: 5,
+                action: false,
+            } %}
+            {% include 'bids/list.html.twig' with vars %}
         </div>
     </div>
     <div class="row">

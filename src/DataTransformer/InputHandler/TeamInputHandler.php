@@ -10,32 +10,43 @@ use App\Entity\PlayerTeamInterface;
 use App\Entity\Team;
 use App\Repository\TeamRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class TeamInputHandler
+class TeamInputHandler implements InputHandlerInterface
 {
     public function __construct(
         private EntityManagerInterface $manager,
+        private TeamRepository $repository,
     )
     {
     }
 
-    public function handle(TeamInput $teamInput, ?Team $team = null): Team|ConstraintViolationListInterface
+    /**
+     * @param TeamInput $data
+     * @return mixed|Team
+     * @throws Exception
+     */
+    public function handle($data): mixed
     {
+        $team = null;
+        if ($data->teamId) {
+            $team = $this->repository->find($data->teamId);
+
+            if (is_null($team)) {
+                throw new Exception(sprintf('Team with id %s not found', $data->teamId));
+            }
+        }
         $team = $team ?? new Team();
         $team
-            ->setName($teamInput->name)
-            ->setCountry($teamInput->country)
-            ->setAcountBalance($teamInput->acountBalance);
+            ->setName($data->name)
+            ->setCountry($data->country)
+            ->setAcountBalance($data->acountBalance);
 
         $this->manager->persist($team);
 
-
-        //dd($teamInput->players);
-
-        /** @var PlayerTeamInput $playerInput */
-        foreach ($teamInput->players as $playerInput) {
+        foreach ($data->players as $playerInput) {
             $player = new Player();
             $player->setName($playerInput->name);
             $player->setSurname($playerInput->surname);

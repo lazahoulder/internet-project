@@ -1,0 +1,91 @@
+<div x-data="bids()" id="bid-root-elt"
+     data-player-id="{{ playerTeamId ?? 'null'}}"
+     data-max-value="{{ maxValue }}"
+     data-action="{{ action ? 'true' : 'false' }}"
+     x-ref="bids"
+>
+    <div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Player</th>
+                <th scope="col">Team</th>
+                <th scope="col">Bid value</th>
+                <th scope="col" class="text-right" style="width: 10%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <template x-if="bids.length === 0">
+                <tr>
+                    <td colspan="5">
+                        <div class="alert alert-info text-center">
+                            There is no players in this team please add new :)
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+
+        </table>
+        <nav aria-label="Page navigation example" x-show="pages > 1">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" :class="{ 'disabled': actualPage === 1 }">
+                    <a class="page-link" href="#" x-on:click.prevent="retrieveBIds(actualPage-1)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <template x-for="pageNumber in pages" :key="pageNumber">
+                    <li class="page-item" :class="{ 'active': actualPage === pageNumber }">
+                        <a class="page-link" href="#" x-text="pageNumber" x-on:click.prevent="retrieveBIds(pageNumber)"></a>
+                    </li>
+
+                </template>
+                <li class="page-item" :class="{ 'disabled': actualPage === pages }">
+                    <a class="page-link" href="#" x-on:click.prevent="retrieveBIds(actualPage+1)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+<script type="application/javascript">
+    function bids() {
+        return {
+            bids: [],
+            playerTeamId: JSON.parse(document.getElementById('bid-root-elt').dataset.playerId),
+            maxValue: JSON.parse(document.getElementById('bid-root-elt').dataset.maxValue),
+            action: JSON.parse(document.getElementById('bid-root-elt').dataset.action),
+            actualPage: 1,
+            pages: 0,
+            uri: '{{ path('api_bids_list') }}',
+
+            async retrieveBIds(page = this.actualPage) {
+                let params = new URLSearchParams({
+                    page: page,
+                });
+                if (this.playerTeamId) {
+                    params.append('playerTeamId', this.playerTeamId)
+                }
+
+                if (this.maxValue) {
+                    params.append('limit', this.maxValue)
+                }
+                let uri = this.uri + '?' + params.toString();
+                let response = await (await fetch(uri)).json();
+                this.bids = response.results;
+                this.actualPage = page;
+                this.pages = response.pageNumber;
+            },
+
+            createBid() {
+
+            },
+
+            init() {
+                this.retrieveBIds();
+            }
+        };
+    }
+</script>

@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Bid;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -63,4 +64,28 @@ class BidRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function findActiveBidsQuery(?string $playerTeamId = null) : QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('b');
+        $qb
+            ->join('b.playerTeam', 'pt')
+        ;
+
+        if ($playerTeamId) {
+            $qb
+                ->andWhere('pt.id = :val')
+                ->setParameter('val', $playerTeamId)
+            ;
+        }
+
+        $qb
+            ->andWhere('b.closed = :closed')
+            ->setParameter('closed', false)
+            ->addOrderBy('b.value', 'DESC')
+            ->addOrderBy('b.date', 'DESC')
+            ;
+
+
+        return  $qb;
+    }
 }

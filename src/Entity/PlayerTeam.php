@@ -17,27 +17,27 @@ class PlayerTeam implements PlayerTeamInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     private ?float $amountValue = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     private ?string $state = null;
 
     #[ORM\ManyToOne(inversedBy: 'playerTeams')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     private ?Player $player = null;
 
     #[ORM\ManyToOne(inversedBy: 'playerTeams')]
@@ -46,11 +46,11 @@ class PlayerTeam implements PlayerTeamInterface
     private ?Team $team = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     private ?\DateTimeInterface $expectedEndDate = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     private ?float $sellingValue = null;
 
     #[ORM\OneToMany(mappedBy: 'playerTeam', targetEntity: Bid::class, orphanRemoval: true)]
@@ -120,7 +120,7 @@ class PlayerTeam implements PlayerTeamInterface
         return $this->player;
     }
 
-    public function setPlayer(?Player $player): self
+    public function setPlayer(?PlayerInterface $player): self
     {
         $this->player = $player;
 
@@ -132,7 +132,7 @@ class PlayerTeam implements PlayerTeamInterface
         return $this->team;
     }
 
-    public function setTeam(?Team $team): self
+    public function setTeam(?TeamInterface $team): self
     {
         $this->team = $team;
 
@@ -208,7 +208,7 @@ class PlayerTeam implements PlayerTeamInterface
         return $this;
     }
 
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_team_show'])]
     public function getCountActiveBid() : int
     {
         return $this->getActiveBids()->count();

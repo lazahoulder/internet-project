@@ -1,10 +1,18 @@
+{% set active = 'team' %}
+
 {% extends 'base.html.twig' %}
 
 {% block body %}
     <div class="container" x-data="team()">
         <div class="row">
-            <div class="col-sm-12">
+            <div class="col-sm-9">
                 <h3>Team</h3>
+            </div>
+            <div class="col-sm-3">
+                <a href="{{ path('app_team_index') }}" class="btn btn-sm btn-outline-dark float-end">
+                    <i class="fa-solid fa-list"></i>
+                    &nbsp;Back to team list
+                </a>
             </div>
         </div>
         <hr>
@@ -31,10 +39,11 @@
                         <i class="fa fa-plus"></i>
                         &nbsp;New player
                     </button>
-                    <button type="button" class="btn btn-outline-dark">
+                    <a href="{{ path('app_player_index', {'teamId': team.id}) }}" type="button"
+                       class="btn btn-outline-dark">
                         <i class="fa fa-shopping-cart"></i>
-                        &nbsp;Buy Player
-                    </button>
+                        &nbsp;Buy/Hire Player
+                    </a>
                 </div>
             </div>
         </div>
@@ -56,14 +65,26 @@
                         <tr>
                             <td x-text="player.player.name"></td>
                             <td x-text="player.player.surname"></td>
-                            <td x-text="player.amountValue"></td>
+                            <td x-text="player.sellingValue ?? player.amountValue"></td>
                             <td x-text="player.countActiveBid"></td>
                             <td class="text-right">
-                                <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
-                                    <button type="button" class="btn btn-outline-primary" @click="editPlayer(player.id)">
+                                <div class="btn-group  float-end" role="group" aria-label="Basic outlined example">
+                                    <a class="btn btn-sm btn-outline-primary"
+                                       x-bind:href="playerUri + player.player.id">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            @click="editPlayer(player.id)">
                                         <i class="fa fa-pencil"></i>
                                     </button>
-                                    <button type="button" class="btn btn-outline-danger" @click="removePlayer(player.id)">
+                                    <template x-if="player.state === 'active'">
+                                        <button type="button" class="btn btn-sm btn-outline-success"
+                                                @click="placeToMarket(player.id)">
+                                            <i class="fa fa-bullhorn"></i>
+                                        </button>
+                                    </template>
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                            @click="removePlayer(player.id)">
                                         <i class="fas fa-user-alt-slash"></i>
                                     </button>
                                 </div>
@@ -85,18 +106,21 @@
                 <nav aria-label="Page navigation example" x-show="pages > 1">
                     <ul class="pagination justify-content-center">
                         <li class="page-item" :class="{ 'disabled': actualPage === 1 }">
-                            <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage-1)" aria-label="Previous">
+                            <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage-1)"
+                               aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
                         <template x-for="pageNumber in pages" :key="pageNumber">
                             <li class="page-item" :class="{ 'active': actualPage === pageNumber }">
-                                <a class="page-link" href="#" x-text="pageNumber" x-on:click.prevent="retrievePlayers(pageNumber)"></a>
+                                <a class="page-link" href="#" x-text="pageNumber"
+                                   x-on:click.prevent="retrievePlayers(pageNumber)"></a>
                             </li>
 
                         </template>
                         <li class="page-item" :class="{ 'disabled': actualPage === pages }">
-                            <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage+1)" aria-label="Next">
+                            <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage+1)"
+                               aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
@@ -107,22 +131,25 @@
         <div class="row" x-show="showForm">
             <form @submit.prevent="submitForm()">
                 <div class="mb-3">
-                    <input type="text" placeholder="Name" class="form-control" :class="formError.name !== '' ? 'is-invalid' : ''" x-model="formData.name">
+                    <input type="text" placeholder="Name" class="form-control"
+                           :class="formError.name !== '' ? 'is-invalid' : ''" x-model="formData.name">
                     <div class="invalid-feedback" x-text="formError.name"></div>
                 </div>
                 <span class=""></span>
                 <div class="mb-3">
-                    <input type="text" placeholder="Surname" class="form-control" :class="formError.surname !== '' ? 'is-invalid' : ''" x-model="formData.surname">
+                    <input type="text" placeholder="Surname" class="form-control"
+                           :class="formError.surname !== '' ? 'is-invalid' : ''" x-model="formData.surname">
                     <div class="invalid-feedback" x-text="formError.surname"></div>
                 </div>
                 <div class="mb-3">
                     <input type="number" placeholder="Value" class="form-control" x-model.number="formData.value">
                 </div>
                 <div class="mb-3">
-                    <input type="date" placeholder="Excepted end data" class="form-control" x-model="formData.expectedEndDate">
+                    <input type="date" placeholder="Excepted end data" class="form-control"
+                           x-model="formData.expectedEndDate">
                 </div>
                 <div class="mb-3">
-                    <div class="btn-group float-end" role="group" >
+                    <div class="btn-group float-end" role="group">
                         <button class="btn btn-xs btn-outline-danger" @click.prevent="closeForm()">
                             <i class="fa fa-close"></i>
                             &nbsp;Cancel
@@ -135,6 +162,33 @@
                 </div>
             </form>
         </div>
+        <button type="button" x-show="false" x-ref="showModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Launch demo modal
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Sell player: <span x-text="sellFormData.name"></span></h1>
+                        <button type="button" x-ref="close-modal" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="sellValue" class="form-label">Value</label>
+                            <input type="number" class="form-control" :class="sellFormData.sellValue !== '' ? 'is-invalid' : ''"
+                                   id="sellValue" x-model.number="sellFormData.sellValue">
+                            <div class="invalid-feedback" x-text="formError.name"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" @click="sellPlayer()">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script type="application/javascript">
         function team() {
@@ -142,7 +196,9 @@
                 teamId: '{{ team.id }}',
                 players: [],
                 countActivePlayers: '{{ team.countActivePlayers }}',
-                uri: '{{ path('api_team_read', {"id" : team.id}) }}/players',
+                uri: '{{ path('api_players_list') }}',
+                teamPlayerUri: '{{ path('api_team_add_player', {"id" : team.id}) }}',
+                playerUri: '{{ path('app_player_index') }}',
                 showList: true,
                 showForm: false,
                 editData: false,
@@ -152,8 +208,18 @@
                 formData: {
                     name: '',
                     surname: '',
-                    value: '',
+                    value: 0,
                     expectedEndDate: '',
+                },
+
+                sellFormData: {
+                    name: '',
+                    playerTeamId: '',
+                    sellValue: 0,
+                },
+
+                sellFormErr: {
+                    sellValue: '',
                 },
 
                 formError: {
@@ -171,7 +237,7 @@
 
                     this.formData.name = playerTeam ? playerTeam.player.name : '';
                     this.formData.surname = playerTeam ? playerTeam.player.surname : '';
-                    this.formData.value = playerTeam ? playerTeam.amountValue : '';
+                    this.formData.value = playerTeam ? playerTeam.amountValue : 0;
                     this.formData.expectedEndDate = playerTeam && playerTeam.expectedEndDate ?
                         new Date(playerTeam.expectedEndDate).toISOString().substring(0, 10) : '';
                     this.formError = {
@@ -182,7 +248,8 @@
 
                 async retrievePlayers(page = this.actualPage) {
                     const params = new URLSearchParams({
-                        page: page
+                        page: page,
+                        teamId: this.teamId
                     });
                     let uri = this.uri + '?' + params.toString();
                     let response = await (await fetch(uri)).json();
@@ -222,19 +289,65 @@
                     }
                 },
 
-                removePlayer() {
-
+                async removePlayer(id) {
+                    let uri = this.uri + id;
+                    await fetch(uri, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+                        this.retrievePlayers();
+                    });
                 },
 
-                sellPlayer() {
+                placeToMarket(id) {
+                    let playerTeam = this.players.find(elt => elt.id === id);
+                    this.sellFormData.name = playerTeam.player.name;
+                    this.sellFormData.playerTeamId = playerTeam.id;
+                    this.sellFormData.sellValue = playerTeam.sellingValue;
+                    const buttonModal = document.querySelector('[x-ref="showModal"]');
+                    buttonModal.click();
+                },
 
+                async sellPlayer() {
+                    let uri = this.uri + this.sellFormData.playerTeamId;
+                    await fetch(uri, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.sellFormData),
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+                        this.retrievePlayers();
+                        const buttonModal = document.querySelector('[x-ref="close-modal"]');
+                        buttonModal.click();
+                    }).catch((err) => {
+                        err.response.then((data) => {
+                            this.sellFormErr = data;
+                        });
+                    });
                 },
 
                 async createPlayer() {
                     this.formData.expectedEndDate = this.formData.expectedEndDate === '' ?
                         null : this.formData.expectedEndDate;
                     console.log(this.formData);
-                    await fetch(this.uri, {
+                    await fetch(this.teamPlayerUri, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -261,7 +374,7 @@
                 async updatePlayer() {
                     this.formData.expectedEndDate = this.formData.expectedEndDate === '' ?
                         null : this.formData.expectedEndDate;
-                    let uri = this.uri + '/' + this.editPlayerId;
+                    let uri = this.teamPlayerUri + '/' + this.editPlayerId;
                     await fetch(uri, {
                         method: "PUT",
                         headers: {
@@ -269,18 +382,21 @@
                             Accept: "application/json",
                         },
                         body: JSON.stringify(this.formData),
-                    })
-                        .then((response) => {
-                            if (!response.ok) {
-                                let err = new Error("HTTP status code: " + response.status)
-                                err.response = response.json();
-                                err.status = response.status
-                                throw err
-                            }
-                            this.retrievePlayers();
-                            this.closeForm();
-                        });
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+                        this.retrievePlayers();
+                        this.closeForm();
+                    });
                 },
+
+                showPlayer(id) {
+                    window.location.href = this.playerUri + id;
+                }
             }
         }
     </script>

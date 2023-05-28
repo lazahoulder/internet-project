@@ -1,0 +1,99 @@
+<div x-data="activePlayer()">
+    <div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Surname</th>
+                <th scope="col">Team</th>
+                <th scope="col">Actual value</th>
+                <th scope="col">Active bids</th>
+                <th scope="col" class="text-right" style="width: 10%">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="player in players">
+                <tr>
+                    <td x-text="player.player.name"></td>
+                    <td x-text="player.player.surname"></td>
+                    <td x-text="player.team.name"></td>
+                    <td x-text="player.amountValue"></td>
+                    <td x-text="player.countActiveBid"></td>
+                    <td class="text-right">
+                        <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
+                            <a type="button" class="btn btn-sm btn-outline-primary"
+                               data-toggle="tooltip" data-placement="top" title="Show Player"
+                               x-bind:href="playerUri + player.player.id">
+                                <i class="fa fa-eye"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                    data-toggle="tooltip" data-placement="top" title="Bid on player"
+                                    @click="bidPlayer(player.id)">
+                                <i class="fa fa-gavel" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-dark" @click="editPlayer(player.player.id)">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            <template x-if="players.length === 0">
+                <tr>
+                    <td colspan="5">
+                        <div class="alert alert-info text-center">
+                            There is no players in this team please add new :)
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+
+        </table>
+        <nav aria-label="Page navigation example" x-show="pages > 1">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" :class="{ 'disabled': actualPage === 1 }">
+                    <a class="page-link" href="#" x-on:click.prevent="retrieveActivePlayers(actualPage-1)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <template x-for="pageNumber in pages" :key="pageNumber">
+                    <li class="page-item" :class="{ 'active': actualPage === pageNumber }">
+                        <a class="page-link" href="#" x-text="pageNumber" x-on:click.prevent="retrieveActivePlayers(pageNumber)"></a>
+                    </li>
+
+                </template>
+                <li class="page-item" :class="{ 'disabled': actualPage === pages }">
+                    <a class="page-link" href="#" x-on:click.prevent="retrieveActivePlayers(actualPage+1)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+<script type="application/javascript">
+    function activePlayer() {
+        return {
+            players: [],
+            actualPage: 1,
+            pages: 0,
+            uri: '{{ path('api_players_list') }}',
+
+            async retrieveActivePlayers(page = this.actualPage) {
+                const params = new URLSearchParams({
+                    page: page
+                });
+                let uri = this.uri + '?' + params.toString();
+                let response = await (await fetch(uri)).json();
+                this.players = response.results;
+                this.actualPage = page;
+                this.pages = response.pageNumber;
+            },
+
+            init() {
+                this.retrieveActivePlayers();
+            }
+        };
+    }
+</script>

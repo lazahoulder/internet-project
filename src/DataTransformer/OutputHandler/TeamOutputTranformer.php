@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataTransformer\OutputHandlar;
+namespace App\DataTransformer\OutputHandler;
 
 use App\Entity\PlayerTeamInterface;
 use App\Entity\Team;
@@ -35,6 +35,6 @@ class TeamOutputTranformer implements OutputTransformerInterface
      */
     public function normalize($team)
     {
-        return $this->objectNormalizer->normalize($team, null, ['groups' => 'team_show']);
+        return $this->objectNormalizer->normalize($team, null, ['groups' => 'team_list']);
     }
 }

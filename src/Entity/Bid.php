@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\BidRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BidRepository::class)]
@@ -26,6 +27,9 @@ class Bid implements BidInterface
 
     #[ORM\Column(nullable: true)]
     private ?bool $closed = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $date = null;
 
     public function getId(): ?int
     {
@@ -76,6 +80,18 @@ class Bid implements BidInterface
     public function setClosed(?bool $closed): self
     {
         $this->closed = $closed;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): self
+    {
+        $this->date = $date;
 
         return $this;
     }

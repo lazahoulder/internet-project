@@ -1,3 +1,5 @@
+{% set active = 'team' %}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Hello TeamController!{% endblock %}
@@ -9,7 +11,7 @@
                 <h3 x-text="headerTitle"></h3>
             </div>
             <div class="col-sm-3">
-                <button x-show="showList" type="button" class="btn btn-primary" @click="createTeamForm()">
+                <button x-show="showList" type="button" class="btn btn-sm btn-outline-dark float-end" @click="createTeamForm()">
                     <i class="fa fa-plus"></i>
                     &nbsp;New team
                 </button>
@@ -22,7 +24,7 @@
                     <th scope="col">Name</th>
                     <th scope="col">Country</th>
                     <th scope="col">Acount balance</th>
-                    <th scope="col">Action</th>
+                    <th scope="col"><span class="float-end">Action</span></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -31,15 +33,15 @@
                         <td x-text="team.name"></td>
                         <td x-text="team.country"></td>
                         <td x-text="team.acountBalance"></td>
-                        <td class="text-right">
-                            <div class="hidden-sm hidden-xs btn-group">
-                                <button class="btn btn-xs btn-info" @click="showTeam(team.id)">
+                        <td>
+                            <div class="hidden-sm hidden-xs btn-group float-end">
+                                <a class="btn btn-sm btn-outline-primary" x-bind:href="baseUri + team.id">
                                     <i class="ace-icon fa fa-eye bigger-120"></i>
-                                </button>
-                                <button class="btn btn-xs btn-secondary" @click="editTeam(team.id)">
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary" @click="editTeam(team.id)">
                                     <i class="ace-icon fa fa-edit bigger-120"></i>
                                 </button>
-                                <button class="btn btn-xs btn-danger"
+                                <button class="btn btn-sm btn-outline-danger"
                                         @click="removeTeam(team.id)">
                                     <i class="ace-icon fa fa-close bigger-120"></i>
                                 </button>

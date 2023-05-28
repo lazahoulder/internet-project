@@ -15,19 +15,19 @@ class Team implements TeamInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['team_list', 'team_show'])]
+    #[Groups(['team_list', 'player_team_show'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['team_list', 'team_show'])]
+    #[Groups(['team_list', 'player_team_show'])]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['team_list', 'team_show'])]
+    #[Groups(['team_list'])]
     private ?float $acountBalance = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['team_list', 'team_show'])]
+    #[Groups(['team_list'])]
     private ?string $country = null;
 
     #[ORM\OneToMany(mappedBy: 'team', targetEntity: PlayerTeam::class, orphanRemoval: true)]
@@ -113,7 +113,6 @@ class Team implements TeamInterface
         return $this;
     }
 
-    #[Groups(['team_show'])]
     public function getActivePlayers(): array
     {
         $players = [];
@@ -126,7 +125,7 @@ class Team implements TeamInterface
         return $players;
     }
 
-    #[Groups(['team_list', 'team_show'])]
+    #[Groups(['team_list'])]
     public function getCountActivePlayers(): int
     {
         return count($this->getActivePlayers());
@@ -137,7 +136,7 @@ class Team implements TeamInterface
         return $this->getTeamPlayersByStatus(PlayerTeamInterface::IN_MARKET_STATE);
     }
 
-    #[Groups(['team_list', 'team_show'])]
+    #[Groups(['team_list'])]
     public function getCountInMarketPlayers(): int
     {
         return count($this->getInMarketPlayers());
