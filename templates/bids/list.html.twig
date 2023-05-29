@@ -5,22 +5,55 @@
      x-ref="bids"
 >
     <div>
+        <button x-show="false" @click="retrieveBIds()" x-ref="reload-bids"></button>
         <table class="table">
             <thead>
             <tr>
-                <th scope="col">Player</th>
-                <th scope="col">Team</th>
-                <th scope="col">Bid value</th>
-                <th scope="col" class="text-right" style="width: 10%">Action</th>
+                <th scope="col">Date</th>
+                {% if action == false %}
+                    <th scope="col">Player</th>
+                    <th scope="col">Actual team</th>
+                {% endif %}
+                <th scope="col">Bidder</th>
+                <th scope="col">Value</th>
+                {% if action %}
+                <th scope="col" class="text-end" style="width: 25%">Action</th>
+                {% endif %}
             </tr>
             </thead>
             <tbody>
+            <template x-for="bid in bids">
+                <tr>
+                    <td x-text="new Date(bid.date).toISOString().substring(0, 10)"></td>
+                    <td x-show="!action" x-text="bid.playerTeam.player.name + ' ' + bid.playerTeam.player.surname"></td>
+                    <td x-show="!action" x-text="bid.playerTeam.team.name"></td>
+                    <td x-text="bid.team.name"></td>
+                    <td x-text="bid.value"></td>
+                    <td x-show="action">
+                        <div class="hidden-sm hidden-xs btn-group float-end">
+                            <button class="btn btn-sm btn-outline-success" @click="acceptBid(bid.id)">
+                                <i class="ace-icon fa fa-check bigger-120"></i>
+                                &nbsp;Accept
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" @click="updateBid(bid.id)">
+                                <i class="ace-icon fa fa-edit bigger-120"></i>
+                                &nbsp;Edit
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    @click="removeBid(bid.id)">
+                                <i class="ace-icon fa fa-close bigger-120"></i>
+                                &nbsp;Remove
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </template>
 
             <template x-if="bids.length === 0">
                 <tr>
                     <td colspan="5">
                         <div class="alert alert-info text-center">
-                            There is no players in this team please add new :)
+                            There is no bids in this player you can bid :D
                         </div>
                     </td>
                 </tr>
@@ -79,8 +112,44 @@
                 this.pages = response.pageNumber;
             },
 
-            createBid() {
+            async acceptBid(id) {
+                let uri = this.uri + id;
+                await fetch(uri, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                }).then((response) => {
+                    if (!response.ok) {
+                        let err = new Error("HTTP status code: " + response.status)
+                        err.response = response.json();
+                        err.status = response.status
+                        throw err
+                    }
+                    this.retrieveBIds();
+                    const reloadHistory = document.querySelector('[x-ref="reload-history"]')
+                    reloadHistory.click();
+                });
+            },
 
+            async removeBid(id) {
+                let uri = this.uri + id;
+                await fetch(uri, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                }).then((response) => {
+                    if (!response.ok) {
+                        let err = new Error("HTTP status code: " + response.status)
+                        err.response = response.json();
+                        err.status = response.status
+                        throw err
+                    }
+                    this.retrieveBIds();
+                });
             },
 
             init() {

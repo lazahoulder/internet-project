@@ -81,10 +81,9 @@ class BidRepository extends ServiceEntityRepository
         $qb
             ->andWhere('b.closed = :closed')
             ->setParameter('closed', false)
-            ->addOrderBy('b.value', 'DESC')
             ->addOrderBy('b.date', 'DESC')
+            ->addOrderBy('b.value', 'DESC')
             ;
-
 
         return  $qb;
     }

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\BidRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BidRepository::class)]
 class Bid implements BidInterface
@@ -12,23 +13,28 @@ class Bid implements BidInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['bids_list'])]
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups(['bids_list'])]
     private ?float $value = null;
 
     #[ORM\ManyToOne(inversedBy: 'bids')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['bids_list'])]
     private ?PlayerTeam $playerTeam = null;
 
     #[ORM\ManyToOne(inversedBy: 'bids')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['bids_list'])]
     private ?Team $team = null;
 
     #[ORM\Column(nullable: true)]
     private ?bool $closed = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['bids_list'])]
     private ?\DateTimeInterface $date = null;
 
     public function getId(): ?int

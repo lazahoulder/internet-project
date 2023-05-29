@@ -15,11 +15,11 @@ class Team implements TeamInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['team_list', 'player_team_show'])]
+    #[Groups(['team_list', 'player_team_show', 'bids_list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['team_list', 'player_team_show'])]
+    #[Groups(['team_list', 'player_team_show', 'bids_list'])]
     private ?string $name = null;
 
     #[ORM\Column(nullable: true)]

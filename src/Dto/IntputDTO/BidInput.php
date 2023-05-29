@@ -3,7 +3,7 @@
 namespace App\Dto\IntputDTO;
 
 use Symfony\Component\Validator\Constraints as Assert;
-class SellPlayer
+class BidInput
 {
     public mixed $playerTeamId;
     #[Assert\NotBlank]
@@ -11,5 +11,7 @@ class SellPlayer
     #[Assert\NotEqualTo(
         value: 0,
     )]
-    public ?float $sellValue;
+    public mixed $value;
+    #[Assert\NotBlank]
+    public mixed $teamId;
 }

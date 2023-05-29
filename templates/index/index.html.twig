@@ -2,26 +2,29 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello IndexController!{% endblock %}
-
 {% block body %}
 
-<div class="container">
-    <div class="row" >
-        <div class="col-sm-12">
-            <h5>Recents bids</h5>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <h5 class="text-decoration-underline">Recents bids</h5>
+            </div>
+            <div class="col-sm-12">
+                {% set vars = {
+                    playerTeamId: null,
+                    maxValue: 5,
+                    action: false,
+                } %}
+                {% include 'bids/list.html.twig' with vars %}
+            </div>
         </div>
-        <div class="col-sm-12">
-            {% set vars = {
-                playerTeamId: null,
-                maxValue: 5,
-                action: false,
-            } %}
-            {% include 'bids/list.html.twig' with vars %}
+        <div class="row">
+            <div class="col-sm-12">
+                <h5 class="text-decoration-underline">Players recently sent to the market</h5>
+            </div>
+            <div class="col-sm-12">
+                {% include 'index/market.html.twig' %}
+            </div>
         </div>
     </div>
-    <div class="row">
-
-    </div>
-</div>
 {% endblock %}

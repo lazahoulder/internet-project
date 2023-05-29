@@ -1,0 +1,80 @@
+<div x-data="players()">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Surname</th>
+            <th scope="col">Value</th>
+            <th scope="col">Active bids</th>
+        </tr>
+        </thead>
+        <tbody>
+        <template x-for="player in players">
+            <tr>
+                <td x-text="player.player.name"></td>
+                <td x-text="player.player.surname"></td>
+                <td x-text="player.sellingValue ?? player.amountValue"></td>
+                <td x-text="player.countActiveBid"></td>
+            </tr>
+        </template>
+        <template x-if="players.length === 0">
+            <tr>
+                <td colspan="5">
+                    <div class="alert alert-info text-center">
+                        There is no players in this team please add new :)
+                    </div>
+                </td>
+            </tr>
+        </template>
+        </tbody>
+
+    </table>
+    <nav aria-label="Page navigation example" x-show="pages > 1">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" :class="{ 'disabled': actualPage === 1 }">
+                <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage-1)"
+                   aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            <template x-for="pageNumber in pages" :key="pageNumber">
+                <li class="page-item" :class="{ 'active': actualPage === pageNumber }">
+                    <a class="page-link" href="#" x-text="pageNumber"
+                       x-on:click.prevent="retrievePlayers(pageNumber)"></a>
+                </li>
+
+            </template>
+            <li class="page-item" :class="{ 'disabled': actualPage === pages }">
+                <a class="page-link" href="#" x-on:click.prevent="retrievePlayers(actualPage+1)"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+<script type="application/javascript">
+    function players() {
+        return {
+            players: [],
+            uri: '{{ path('api_players_market') }}',
+            actualPage: 1,
+            pages: 0,
+
+            async retrievePlayers(page = this.actualPage) {
+                const params = new URLSearchParams({
+                    page: page
+                });
+                let uri = this.uri + '?' + params.toString();
+                let response = await (await fetch(uri)).json();
+                this.players = response.results;
+                this.actualPage = page;
+                this.pages = response.pageNumber;
+            },
+
+            init() {
+                this.retrievePlayers();
+            },
+        };
+    }
+</script>

@@ -2,7 +2,9 @@
 
 namespace App\Controller\Api;
 
+use App\DataTransformer\InputHandler\BidInputHandler;
 use App\DataTransformer\OutputHandler\BidsOutputTransformer;
+use App\Dto\IntputDTO\BidInput;
 use App\Entity\Bid;
 use App\Repository\BidRepository;
 use App\Service\BidService;
@@ -12,10 +14,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('api/bids')]
 class BidApi extends BaseApiController
 {
+    use HasInputHandlerTrait;
     public function __construct(
         SerializerInterface           $serializer,
         PaginatorInterface            $paginator,
@@ -41,20 +45,26 @@ class BidApi extends BaseApiController
         return $this->json($data, Response::HTTP_OK);
     }
 
-    #[Route('/', name: 'api_bids_create', methods: ['POST'])]
-    public function createBids(Request $request)
+    #[Route('/', name: 'api_bids_save', methods: ['POST'])]
+    public function saveBids(Request $request, BidInputHandler $inputHandler, ValidatorInterface $validator)
     {
+        /** @var BidInput $input */
+        $input = $this
+            ->serializer
+            ->deserialize($request->getContent(), BidInput::class, 'json');
 
-    }
 
-    #[Route('/{id}', name: 'api_bids_update', methods: ['PUT'])]
-    public function updateBids(Request $request, Bid $bid)
-    {
+        return $this->handleInput(
+            $validator,
+            $input,
+            $inputHandler,
+            $this->bidsOutputTransformer,
+            Response::HTTP_CREATED);
 
     }
 
     #[Route('/{id}', name: 'api_bids_delete', methods: ['DELETE'])]
-    public function deleteBids(Request $request, Bid $bid)
+    public function deleteBids(Bid $bid)
     {
         $this->repository->remove($bid, true);
         $response = new Response();

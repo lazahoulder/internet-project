@@ -2,10 +2,13 @@
 
 namespace App\Service;
 
+use App\Entity\Player;
 use App\Entity\PlayerInterface;
 use App\Entity\PlayerTeam;
 use App\Entity\PlayerTeamInterface;
 use App\Entity\TeamInterface;
+use App\Repository\PlayerRepository;
+use App\Repository\PlayerTeamRepository;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -14,7 +17,12 @@ class PlayerService
 {
     public function __construct(
         private EntityManagerInterface $manager,
-    ){}
+        private PlayerRepository $playerRepository,
+        private PlayerTeamRepository $playerTeamRepository,
+    )
+    {
+
+    }
 
     public function sellPlayer(PlayerTeamInterface $playerTeam, float $value)
     {
@@ -22,7 +30,18 @@ class PlayerService
         $this->manager->flush();
     }
 
-    public function hirePlayer(PlayerInterface $player, TeamInterface $team, ?int $value = null)
+    /**
+     * @param PlayerInterface $player
+     * @param TeamInterface $team
+     * @param int|null $value
+     * @return PlayerTeam
+     */
+    public function hirePlayer(
+        PlayerInterface $player,
+        TeamInterface $team,
+        ?DateTimeInterface $expectedEnddate = null,
+        ?int $value = null,
+    ): PlayerTeam
     {
         $playerTeam = new PlayerTeam();
         $playerTeam
@@ -30,60 +49,42 @@ class PlayerService
             ->setTeam($team)
             ->setStartDate(new \DateTime())
             ->setState(PlayerTeamInterface::ACTIVE_STATE)
+            ->setExpectedEndDate($expectedEnddate)
             ->setAmountValue($value)
         ;
         $this->manager->persist($playerTeam);
         $this->manager->flush();
+
+        return $playerTeam;
     }
 
-    public function freePlayer(PlayerTeamInterface $playerTeam)
+    public function freePlayer(PlayerTeamInterface $playerTeam): void
     {
         $playerTeam->closePlayerContract();
         $this->manager->flush();
     }
 
-    /**
-     * @param TeamInterface $buyerTeam
-     * @param PlayerInterface $player
-     * @param float $value
-     * @param DateTimeInterface|null $expectedEndDate
-     * @return void
-     * @throws Exception
-     */
-    public function buyPlayer(
-        TeamInterface      $buyerTeam,
-        PlayerInterface    $player,
-        float              $value,
-        ?DateTimeInterface $expectedEndDate = null,
-    ): void
+    public function deletePlayer(Player $player): void
     {
-        if ($buyerTeam->getAcountBalance() < $value) {
-            throw new Exception('Team cannot afford player');
+        if ($player->isActive()) {
+            throw new Exception('Active player cannot be removed');
         }
 
-        $actualStatus = $player->getActualActiveStatus();
-        $actualStatus->closePlayerContract();
-        $sellerTeam = $player->getActualTeam();
-        $sellerTeam->increaseBalance($value);
-        $buyerTeam->decreaseBalance($value);
-        $newStatus = new PlayerTeam();
-        $newStatus
-            ->setTeam($buyerTeam)
-            ->setPlayer($player)
-            ->setAmountValue($value)
-            ->setStartDate(new \DateTime())
-            ->setExpectedEndDate($expectedEndDate)
-            ->setState(PlayerTeamInterface::ACTIVE_STATE)
-        ;
-        foreach ($actualStatus->getBids() as $bid) {
-            $bid->setClosed(true);
-        }
-        $this->manager->persist($newStatus);
-        $this->manager->flush();
+        $this->playerRepository->remove($player, true);
     }
 
-    public function placeBidPlayer(TeamInterface $team, float $amount)
+    public function getInactivePlayers(int $page = 1, int $limit = 10): array
     {
+        $inactivQuery = $this->playerRepository->findInactivePlayersQuery();
+        $total = $this->playerRepository->countInactivePlayers($inactivQuery);
+        $data = $this->playerRepository->getPaginateNativeData($inactivQuery, $page, $limit);
+        $pageCount = (int)ceil($total/$limit);
 
+        return [
+            'results' => $data,
+            'page' => $page,
+            'pageNumber' => $pageCount,
+            'total' => $total
+        ];
     }
 }

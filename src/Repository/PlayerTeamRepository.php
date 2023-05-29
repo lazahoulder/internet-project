@@ -86,4 +86,15 @@ class PlayerTeamRepository extends ServiceEntityRepository
 
         return $qb;
     }
+
+    public function findInMarketPlayersQb(): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('p');
+        $qb
+            ->andWhere($qb->expr()->eq('p.state', ':inactiveState'))
+            ->setParameter('inactiveState',PlayerTeamInterface::IN_MARKET_STATE)
+        ;
+
+        return $qb;
+    }
 }

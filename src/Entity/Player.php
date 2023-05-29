@@ -15,15 +15,15 @@ class Player implements PlayerInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_show', 'player_team_show', 'bids_list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_show', 'player_team_show', 'bids_list'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['team_show', 'player_team_show'])]
+    #[Groups(['player_show', 'player_team_show', 'bids_list'])]
     private ?string $surname = null;
 
     #[ORM\OneToMany(mappedBy: 'player', targetEntity: PlayerTeam::class, orphanRemoval: true)]

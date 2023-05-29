@@ -1,0 +1,52 @@
+<div x-data="history()">
+    <button x-show="false" @click="retrieveHistory()" x-ref="reload-history"></button>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Team</th>
+            <th scope="col">Start date</th>
+            <th scope="col">End date</th>
+            <th scope="col">Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        <template x-for="history in histories">
+            <tr>
+                <td x-text="history.team.name"></td>
+                <td x-text="new Date(history.startDate).toISOString().substring(0, 10)"></td>
+                <td x-text="history.endDate ? new Date(history.endDate).toISOString().substring(0, 10) : ''"></td>
+                <td x-text="history.amountValue"></td>
+            </tr>
+        </template>
+
+        <template x-if="histories.length === 0">
+            <tr>
+                <td colspan="4">
+                    <div class="alert alert-info text-center">
+                        Player is starting
+                    </div>
+                </td>
+            </tr>
+        </template>
+        </tbody>
+
+    </table>
+
+</div>
+<script type="application/javascript">
+    function history() {
+        return {
+            histories: [],
+            uri: '{{ path('api_players_list') }}',
+
+            async retrieveHistory() {
+                let uri = this.uri + '{{ player.id }}/history';
+                this.histories  = await (await fetch(uri)).json();
+            },
+
+            init() {
+                this.retrieveHistory();
+            }
+        };
+    }
+</script>

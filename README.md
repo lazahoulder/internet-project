@@ -1,144 +1,49 @@
-PHPDocker.io generated environment
+Mercato test applicatioin
 ==================================
 
-# Add to your project #
+Welcome to the official README file for Mercato test application! This document provides essential information about the
+application, its purpose, features, installation instructions, and other useful details.
 
-Simply, unzip the file into your project, this will create `docker-compose.yml` on the root of your project and a folder
-named `phpdocker` containing nginx and php-fpm config for it.
+1. [ Overview. ](#overview-)
+2. [ Dependencies. ](#dependencies-)
+3. [ Installation. ](#installation-)
 
-Ensure the webserver config on `phpdocker/nginx/nginx.conf` is correct for your project. PHPDocker.io will have
-customised this file according to the front controller location relative to the docker-compose file you chose on the
-generator (by default `public/index.php`).
+# Overview #
 
-Note: you may place the files elsewhere in your project. Make sure you modify the locations for the php-fpm dockerfile,
-the php.ini overrides and nginx config on `docker-compose.yml` if you do so.
-
-# How to run #
-
-Dependencies:
-
-* docker. See [https://docs.docker.com/engine/installation](https://docs.docker.com/engine/installation)
-* docker-compose. See [docs.docker.com/compose/install](https://docs.docker.com/compose/install/)
-
-Once you're done, simply `cd` to your project and run `docker-compose up -d`. This will initialise and start all the
-containers, then leave them running in the background.
-
-## Services exposed outside your environment ##
-
-You can access your application via **`localhost`**. Mailhog and nginx both respond to any hostname, in case you want to
-add your own hostname on your `/etc/hosts`
-
-Service|Address outside containers
--------|--------------------------
-Webserver|[localhost:32000](http://localhost:32000)
-MySQL|**host:** `localhost`; **port:** `32002`
-
-## Hosts within your environment ##
-
-You'll need to configure your application to use any services you enabled:
-
-Service|Hostname|Port number
-------|---------|-----------
-php-fpm|php-fpm|9000
-MySQL|mysql|3306 (default)
-
-# Docker compose cheatsheet #
-
-**Note:** you need to cd first to where your docker-compose.yml file lives.
-
-* Start containers in the background: `docker-compose up -d`
-* Start containers on the foreground: `docker-compose up`. You will see a stream of logs for every container running.
-  ctrl+c stops containers.
-* Stop containers: `docker-compose stop`
-* Kill containers: `docker-compose kill`
-* View container logs: `docker-compose logs` for all containers or `docker-compose logs SERVICE_NAME` for the logs of
-  all containers in `SERVICE_NAME`.
-* Execute command inside of container: `docker-compose exec SERVICE_NAME COMMAND` where `COMMAND` is whatever you want
-  to run. Examples:
-    * Shell into the PHP container, `docker-compose exec php-fpm bash`
-    * Run symfony console, `docker-compose exec php-fpm bin/console`
-    * Open a mysql shell, `docker-compose exec mysql mysql -uroot -pCHOSEN_ROOT_PASSWORD`
-
-# Application file permissions #
-
-As in all server environments, your application needs the correct file permissions to work properly. You can change the
-files throughout the container, so you won't care if the user exists or has the same ID on your host.
-
-`docker-compose exec php-fpm chown -R www-data:www-data /application/public`
-
-# Recommendations #
-
-It's hard to avoid file permission issues when fiddling about with containers due to the fact that, from your OS point
-of view, any files created within the container are owned by the process that runs the docker engine (this is usually
-root). Different OS will also have different problems, for instance you can run stuff in containers
-using `docker exec -it -u $(id -u):$(id -g) CONTAINER_NAME COMMAND` to force your current user ID into the process, but
-this will only work if your host OS is Linux, not mac. Follow a couple of simple rules and save yourself a world of
-hurt.
-
-* Run composer outside of the php container, as doing so would install all your dependencies owned by `root` within your
-  vendor folder.
-* Run commands (ie Symfony's console, or Laravel's artisan) straight inside of your container. You can easily open a
-  shell as described above and do your thing from there.
-
-# Simple basic Xdebug configuration with integration to PHPStorm
-
-## Xdebug 2
-
-To configure **Xdebug 2** you need add these lines in php-fpm/php-ini-overrides.ini:
-
-### For linux:
-
-```
-xdebug.remote_enable = 1
-xdebug.remote_connect_back = 1
-xdebug.remote_autostart = 1
-```
-
-### For macOS and Windows:
-
-```
-xdebug.remote_enable = 1
-xdebug.remote_host = host.docker.internal
-xdebug.remote_autostart = 1
-```
-
-## Xdebug 3
-
-To configure **Xdebug 3** you need add these lines in php-fpm/php-ini-overrides.ini:
-
-### For linux:
-
-```
-xdebug.mode = debug
-xdebug.remote_connect_back = true
-xdebug.start_with_request = yes
-```
-
-### For macOS and Windows:
-
-```
-xdebug.mode = debug
-xdebug.client_host = host.docker.internal
-xdebug.start_with_request = yes
-```
-
-## Add the section “environment” to the php-fpm service in docker-compose.yml:
-
-```
-environment:
-  PHP_IDE_CONFIG: "serverName=Docker"
-```
-
-### Create a server configuration in PHPStorm:
-
-* In PHPStorm open Preferences | Languages & Frameworks | PHP | Servers
-* Add new server
-* The “Name” field should be the same as the parameter “serverName” value in “environment” in docker-compose.yml (i.e. *
-  Docker* in the example above)
-* A value of the "port" field should be the same as first port(before a colon) in "webserver" service in
-  docker-compose.yml
-* Select "Use path mappings" and set mappings between a path to your project on a host system and the Docker container.
-* Finally, add “Xdebug helper” extension in your browser, set breakpoints and start debugging
+This is a simple application to manage team, playesr on team, buy player and sell player
 
 
+# Dependencies #
+
+We need docker and docker-compose for this application to have a complet installation env but we cal use an other lamp 
+or xampp.
+
+the docker env include:
+* nginx
+* php 8.2
+* mysql 8
+
+We also need internet connection cause we load library from cdn.
+We use alpine js as javascript library and bootstrap 5.2 for css and templating.
+
+
+## Installation ##
+
+1. First of all, pull the project and make `cd` command on project.
+2. Run `docker compose up -d` on the root of project to install all dependency and to create the container (skip this 
+step if you don't use docker)
+3. Install all dependencies using composer 
+   * If using docker : `docker compose exec php-fpm composer install`
+   * If not `composer install`
+4. Run migration to setup databases (never forget the `docker compose exec php-fpm` directive before command if
+using docker) : `docker compose exec php-fpm bin/console doctrine:migration:migrate`
+5. Now load fixtures: `docker compose exec php-fpm bin/console doctrine:fixtures:load`
+6. Setup file permission by running `docker-compose exec php-fpm chown -R www-data:www-data /application/public`
+
+
+Now application is ready on [localhost:32000](http://localhost:32000) and you can use it as you like.
+
+Thank you for your interest in this litle project and I hope you enjoy the coding style :).
+If you have any questions or encounter any issues, please feel free to reach me on
+[lazahoulder@gmail.com](mailto:lazahoulder@gmail.com) or on linkedin [Houlder Bariheriarikaza](https://www.linkedin.com/in/houlder-bariheriarilaza-7a6505115/)
 

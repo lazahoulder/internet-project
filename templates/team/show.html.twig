@@ -2,6 +2,8 @@
 
 {% extends 'base.html.twig' %}
 
+{% block title %}Team{% endblock %}
+
 {% block body %}
     <div class="container" x-data="team()">
         <div class="row">
@@ -57,7 +59,7 @@
                         <th scope="col">Surname</th>
                         <th scope="col">Value</th>
                         <th scope="col">Active bids</th>
-                        <th scope="col" class="text-right" style="width: 10%">Action</th>
+                        <th scope="col" class="text-right" style="width: 28%">Action</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -72,20 +74,24 @@
                                     <a class="btn btn-sm btn-outline-primary"
                                        x-bind:href="playerUri + player.player.id">
                                         <i class="fa fa-eye"></i>
+                                        &nbsp;Show
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-secondary"
                                             @click="editPlayer(player.id)">
                                         <i class="fa fa-pencil"></i>
+                                        &nbsp;Edit
                                     </button>
-                                    <template x-if="player.state === 'active'">
-                                        <button type="button" class="btn btn-sm btn-outline-success"
-                                                @click="placeToMarket(player.id)">
-                                            <i class="fa fa-bullhorn"></i>
-                                        </button>
-                                    </template>
+
+                                    <button type="button" class="btn btn-sm btn-outline-success"
+                                            @click="placeToMarket(player.id)">
+                                        <i class="fa fa-bullhorn"></i>
+                                        &nbsp;Sell
+                                    </button>
+
                                     <button type="button" class="btn btn-sm btn-outline-danger"
-                                            @click="removePlayer(player.id)">
+                                            @click="firePlayer(player.id)">
                                         <i class="fas fa-user-alt-slash"></i>
+                                        &nbsp;Fire
                                     </button>
                                 </div>
                             </td>
@@ -162,24 +168,27 @@
                 </div>
             </form>
         </div>
-        <button type="button" x-show="false" x-ref="showModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+
+        <button type="button" x-show="false" x-ref="showModal" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#myModal">
             Launch demo modal
         </button>
-
-        <!-- Modal -->
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Sell player: <span x-text="sellFormData.name"></span></h1>
-                        <button type="button" x-ref="close-modal" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Sell player: <span
+                                    x-text="sellFormData.name"></span></h1>
+                        <button type="button" x-ref="close-modal" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="sellValue" class="form-label">Value</label>
-                            <input type="number" class="form-control" :class="sellFormData.sellValue !== '' ? 'is-invalid' : ''"
+                            <input type="number" class="form-control"
+                                   :class="sellFormErr.sellValue !== '' ? 'is-invalid' : ''"
                                    id="sellValue" x-model.number="sellFormData.sellValue">
-                            <div class="invalid-feedback" x-text="formError.name"></div>
+                            <div class="invalid-feedback" x-text="sellFormErr.sellValue"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -289,8 +298,8 @@
                     }
                 },
 
-                async removePlayer(id) {
-                    let uri = this.uri + id;
+                async firePlayer(id) {
+                    let uri = this.uri + id + '/fire';
                     await fetch(uri, {
                         method: "DELETE",
                         headers: {
@@ -312,7 +321,7 @@
                     let playerTeam = this.players.find(elt => elt.id === id);
                     this.sellFormData.name = playerTeam.player.name;
                     this.sellFormData.playerTeamId = playerTeam.id;
-                    this.sellFormData.sellValue = playerTeam.sellingValue;
+                    this.sellFormData.sellValue = playerTeam.sellingValue ?? playerTeam.amountValue;
                     const buttonModal = document.querySelector('[x-ref="showModal"]');
                     buttonModal.click();
                 },
@@ -354,21 +363,20 @@
                             Accept: "application/json",
                         },
                         body: JSON.stringify(this.formData),
-                    })
-                        .then((response) => {
-                            if (!response.ok) {
-                                let err = new Error("HTTP status code: " + response.status)
-                                err.response = response.json();
-                                err.status = response.status
-                                throw err
-                            }
-                            this.retrievePlayers();
-                            this.closeForm();
-                        }).catch((err) => {
-                            err.response.then((data) => {
-                                this.formError = data;
-                            });
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+                        this.retrievePlayers();
+                        this.closeForm();
+                    }).catch((err) => {
+                        err.response.then((data) => {
+                            this.formError = data;
                         });
+                    });
                 },
 
                 async updatePlayer() {

@@ -5,6 +5,11 @@ namespace App\Repository;
 use App\Entity\Player;
 use App\Entity\PlayerTeamInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NativeQuery;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use function Doctrine\ORM\QueryBuilder;
@@ -42,28 +47,60 @@ class PlayerRepository extends ServiceEntityRepository
         }
     }
 
-    public function findInactivePlayers(): QueryBuilder
+    /**
+     * @return NativeQuery
+     */
+    public function findInactivePlayersQuery(): NativeQuery
     {
-        $qb = $this->createQueryBuilder('p');
-        $qb
-            ->leftJoin('p.playerTeams', 'pt')
-            ->andWhere('pt.state = :state')
-            ->setParameter('state', PlayerTeamInterface::ACTIVE_STATE)
-            ->orderBy('p.id', 'ASC')
-            ->groupBy('p.id')
-            ->having($qb->expr()->eq($qb->expr()->count('p'), 0))
-        ;
+        $sql = "SELECT p.id,
+       p.name,
+       p.surname,
+       (select count(pt.id)
+        from player_team pt
+        where pt.player_id = p.id
+          and (pt.state = 'active' or pt.state = 'in_market')) as countActive
+FROM player p
+         LEFT JOIN player_team p1_ ON p.id = p1_.player_id
+HAVING countActive = 0
+ORDER BY p.id ASC";
 
-        return $qb;
+        $rsm = new ResultSetMapping();
+        $rsm->addScalarResult('id', 'id');
+        $rsm->addScalarResult('name', 'name');
+        $rsm->addScalarResult('surname', 'surname');
+
+        return $this->getEntityManager()->createNativeQuery($sql, $rsm);
     }
 
-//    public function findOneBySomeField($value): ?Player
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function countInactivePlayers(NativeQuery $query): int
+    {
+        $sqlInitial = $query->getSQL();
+
+        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        $rsm->addScalarResult('count', 'count');
+
+        $sqlCount = 'SELECT COUNT(*) AS count FROM (' . $sqlInitial . ') AS item';
+        $qCount = $this->getEntityManager()->createNativeQuery($sqlCount, $rsm);
+
+        //dd($sqlCount->get)
+
+        return (int)$qCount->getSingleScalarResult();
+    }
+
+    /**
+     * @param NativeQuery $query
+     * @param int $page
+     * @param int $limit
+     * @return float|int|mixed|string
+     */
+    public function getPaginateNativeData(NativeQuery $query, int $page, int $limit): mixed
+    {
+        $query->setSQL($query->getSQL() . ' limit ' . (($page - 1) * $limit) . ', ' . $limit);
+
+        return $query->getResult();
+    }
 }

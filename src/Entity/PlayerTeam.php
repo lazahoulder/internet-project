@@ -17,7 +17,7 @@ class PlayerTeam implements PlayerTeamInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['player_team_show'])]
+    #[Groups(['player_team_show','bids_list'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -25,6 +25,7 @@ class PlayerTeam implements PlayerTeamInterface
     private ?\DateTimeInterface $startDate = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
+    #[Groups(['player_team_show'])]
     private ?\DateTimeInterface $endDate = null;
 
     #[ORM\Column(nullable: true)]
@@ -37,12 +38,12 @@ class PlayerTeam implements PlayerTeamInterface
 
     #[ORM\ManyToOne(inversedBy: 'playerTeams')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['player_team_show'])]
+    #[Groups(['player_team_show','bids_list'])]
     private ?Player $player = null;
 
     #[ORM\ManyToOne(inversedBy: 'playerTeams')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['player_team_show'])]
+    #[Groups(['player_team_show','bids_list'])]
     private ?Team $team = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
@@ -216,8 +217,8 @@ class PlayerTeam implements PlayerTeamInterface
 
     public function getActiveBids() : ReadableCollection
     {
-        return $this->getBids()->filter(function($element) {
-            return $element > 1;
+        return $this->getBids()->filter(function(BidInterface $element) {
+            return is_null($element->isClosed()) || $element->isClosed() === false;
         });
     }
 }

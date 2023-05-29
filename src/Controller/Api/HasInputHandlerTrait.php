@@ -3,9 +3,7 @@
 namespace App\Controller\Api;
 
 use App\DataTransformer\InputHandler\InputHandlerInterface;
-use App\DataTransformer\InputHandler\PlayerTeamInputHandler;
 use App\DataTransformer\OutputHandler\OutputTransformerInterface;
-use App\Dto\IntputDTO\PlayerTeamInput;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -16,6 +14,8 @@ trait HasInputHandlerTrait
      * @param ValidatorInterface $validator
      * @param mixed $input
      * @param InputHandlerInterface $inputHandler
+     * @param OutputTransformerInterface $outputTransformer
+     * @param int $httpCode
      * @return JsonResponse
      */
     protected function handleInput(
@@ -27,6 +27,7 @@ trait HasInputHandlerTrait
     ): JsonResponse
     {
         $errors = $validator->validate($input);
+        //dd($errors);
 
         if (count($errors)) {
             return $this->handelError($errors);
@@ -37,7 +38,8 @@ trait HasInputHandlerTrait
         } catch (\Exception $e) {
             return $this->json(
                 [
-                    'message' => $e->getMessage()
+                    'message' => $e->getMessage(),
+                    'trace' => $e->getTrace(),
                 ],
                 Response::HTTP_INTERNAL_SERVER_ERROR
             );

@@ -2,7 +2,7 @@
 
 {% extends 'base.html.twig' %}
 
-{% block title %}Player index{% endblock %}
+{% block title %}Player{% endblock %}
 
 {% block body %}
     <div class="container" x-data="playerPage()">
@@ -11,7 +11,7 @@
                 <h5 x-text="headerTitle"></h5>
             </div>
             <div class="col-sm-6">
-                <button class="btn btn-sm btn-outline-dark float-end" x-show="showList" @click="openForm()">
+                <button class="btn btn-sm btn-outline-dark float-end" x-show="showList" @click="createPlayer()">
                     <i class="fa fa-plus"></i>
                     &nbsp;Add new player
                 </button>
@@ -20,12 +20,14 @@
         <div class="row" x-show="showList">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link" x-ref="active" :class="{ 'active': showActive }" @click.prevent="showActive = true; showInactive = false">
+                    <a class="nav-link" x-ref="active" :class="{ 'active': showActive }"
+                       @click.prevent="showActive = true; showInactive = false">
                         Active
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" x-ref="inactive" :class="{ 'active': showInactive }" @click.prevent="showActive = false; showInactive = true">
+                    <a class="nav-link" x-ref="inactive" :class="{ 'active': showInactive }"
+                       @click.prevent="showActive = false; showInactive = true">
                         Inactive
                     </a>
                 </li>
@@ -56,9 +58,11 @@
                         <div class="mb-3">
                             <label for="team" class="form-label">Team</label>
                             <select class="form-control" name="team" id="team" x-model="formData.teamId">
-                                <option > Select a team</option>
+                                <option> Select a team</option>
                                 <template x-for="team in teams">
+
                                     <option :value="team.id" x-text="team.name"></option>
+
                                 </template>
                             </select>
                         </div>
@@ -78,6 +82,81 @@
                 </form>
             </div>
         </div>
+
+        <button type="button" x-show="false" x-ref="showModal" class="btn btn-primary" data-bs-toggle="modal"
+                data-bs-target="#myModal">
+            Launch demo modal
+        </button>
+        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">
+                            <span x-text="showActive ? 'Bid on ' : 'Hire'"></span> player:
+                            <span x-text="showActive ? bidFormData.name : hireFormData.name"></span></h1>
+                        <button type="button" x-ref="close-modal" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div x-show="showActive">
+                            <div class="mb-3">
+                                <label for="bidValue" class="form-label">Value</label>
+                                <input type="number" class="form-control"
+                                       :class="bidErrData.value !== '' ? 'is-invalid' : ''"
+                                       id="bidValue" x-model.number="bidFormData.value">
+                                <div class="invalid-feedback" x-text="bidErrData.value"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="teamBId" class="form-label">Team</label>
+                                <select class="form-control"
+                                        :class="bidErrData.teamId !== '' ? 'is-invalid' : ''"
+                                        name="team" id="teamBId"
+                                        x-model="bidFormData.teamId">
+                                    <option> Select a team</option>
+                                    <template x-for="team in filteredTeams">
+
+                                        <option :value="team.id" x-text="team.name"></option>
+
+                                    </template>
+                                </select>
+                                <div class="invalid-feedback" x-text="bidErrData.teamId"></div>
+                            </div>
+                        </div>
+                        <div x-show="showInactive">
+                            <div class="mb-3">
+                                <label for="hireValue" class="form-label">Value</label>
+                                <input type="number" class="form-control"
+                                       id="hireValue" x-model.number="hireFormData.value">
+                            </div>
+                            <div class="mb-3">
+                                <label for="hireDate" class="form-label">Excepted end date</label>
+                                <input type="date" class="form-control"
+                                       id="hireDate" x-model.number="hireFormData.exceptedEndDate">
+                            </div>
+                            <div class="mb-3">
+                                <label for="teamHire" class="form-label">Team</label>
+                                <select class="form-control"
+                                        :class="hireErrData.teamId !== '' ? 'is-invalid' : ''"
+                                        name="team" id="teamHire"
+                                        x-model="hireFormData.teamId">
+                                    <option> Select a team</option>
+                                    <template x-for="team in teams">
+
+                                        <option :value="team.id" x-text="team.name"></option>
+
+                                    </template>
+                                </select>
+                                <div class="invalid-feedback" x-text="hireErrData.teamId"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" @click="submitModal()">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script type="application/ecmascript">
         'use strict';
@@ -90,11 +169,13 @@
                 showInactive: false,
                 headerTitle: 'All players',
                 teams: [],
+                filteredTeams: [],
                 teamsUri: '{{ path('api_team_light_list') }}',
                 playerUri: '{{ path('app_player_index') }}',
                 uri: '{{ path('api_players_list') }}',
                 editPlayerId: null,
                 formData: {
+                    playerId: null,
                     name: '',
                     surname: '',
                     teamId: null,
@@ -103,8 +184,34 @@
                     name: '',
                     surname: '',
                 },
+                bidFormData: {
+                    name: '',
+                    playerTeamId: null,
+                    value: 0,
+                    teamId: null,
+                    sellerTeamId: '',
+                },
+                bidErrData: {
+                    value: '',
+                    teamId: '',
+                },
+                hireFormData: {
+                    name: '',
+                    playerId: null,
+                    value: 0,
+                    teamId: null,
+                    exceptedEndDate: '',
+                },
+                hireErrData: {
+                    teamId: '',
+                },
+
+                filterTeams(id) {
+                    this.filteredTeams = this.teams.filter(elt => elt.id !== id);
+                },
 
                 initFormData(player = null) {
+                    this.formData.playerId = player ? player.id : null;
                     this.formData.name = player ? player.name : '';
                     this.formData.surname = player ? player.surname : '';
                     this.formData.teamId = null;
@@ -123,13 +230,23 @@
                 },
 
                 editPlayer(id) {
+                    this.formError = {
+                        name: '',
+                        surname: '',
+                    };
                     this.editPlayerId = id;
                     this.openForm('Edit Player');
-                    let playerTeam = this.players.find(elt => elt.player.id === id);
-                    this.initFormData(playerTeam.player);
+                    let playerTeam = null;
+                    if (typeof this.activePlayers === 'undefined') {
+                        playerTeam = this.inactivePlayers.find(elt => elt.id === id);
+                        this.initFormData(playerTeam);
+                    } else {
+                        playerTeam = this.activePlayers.find(elt => elt.player.id === id);
+                        this.initFormData(playerTeam.player);
+                    }
                 },
 
-                closeForm(header = 'All players'){
+                closeForm(header = 'All players') {
                     this.showList = true;
                     this.showForm = false;
                     this.headerTitle = header;
@@ -139,16 +256,152 @@
                     this.teams = await (await fetch(this.teamsUri)).json();
                 },
 
-                init(){
+                init() {
                     this.retrieveTeam();
                 },
 
                 submitForm() {
-                    console.log(this.formData);
-                    this.closeForm();
-                    let buttonElement = (this.formData.teamId) ?
-                        document.querySelector('[x-ref="active"]') : buttonElement = document.querySelector('[x-ref="inactive"]');
-                    buttonElement.click();
+                    this.addPlayer();
+                    this.formError = {
+                        name: '',
+                        surname: '',
+                    };
+                },
+
+                bidPlayer(id) {
+                    let playerTeam = this.activePlayers.find(elt => elt.id === id);
+                    this.bidFormData.name = playerTeam.player.name;
+                    this.bidFormData.playerTeamId = playerTeam.id;
+                    this.bidFormData.value = playerTeam.sellingValue ?? playerTeam.amountValue;
+                    this.filterTeams(playerTeam.team.id);
+                    console.log(this.filteredTeams);
+                    const buttonModal = document.querySelector('[x-ref="showModal"]');
+                    buttonModal.click();
+                },
+
+                hirePlayer(id) {
+                    let player = this.inactivePlayers.find(elt => elt.id === id);
+                    this.hireFormData.playerId = player.id;
+                    this.hireFormData.name = player.name;
+                    const buttonModal = document.querySelector('[x-ref="showModal"]');
+                    buttonModal.click();
+                },
+
+                submitModal() {
+                    if (this.showActive) {
+                        this.placeBid();
+                    } else if (this.showInactive) {
+                        this.hireNewPlayer();
+                    }
+                },
+
+                async placeBid() {
+                    let uri = '{{ path('api_bids_save') }}';
+                    await fetch(uri, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.bidFormData),
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+
+                        return response.json();
+                    }).then(() => {
+                        const reloadActiveButton = document.querySelector('[x-ref="reload-active"]');
+                        reloadActiveButton.click();
+                        const reloadInactiveButton = document.querySelector('[x-ref="reload-inactive"]')
+                        reloadInactiveButton.click();
+                        const buttonModal = document.querySelector('[x-ref="close-modal"]');
+                        buttonModal.click();
+                        this.bidErrData = {
+                            value: '',
+                            teamId: '',
+                        };
+                    }).catch((err) => {
+                        err.response.then((data) => {
+                            this.bidErrData = data;
+                        });
+                    });
+                },
+
+                async hireNewPlayer() {
+                    this.hireFormData.exceptedEndDate = this.hireFormData.exceptedEndDate === '' ?
+                        null : this.hireFormData.exceptedEndDate;
+                    console.log(this.hireFormData);
+                    let uri = '{{ path('api_players_list') }}' + this.hireFormData.playerId;
+                    await fetch(uri, {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.hireFormData),
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+
+                        return response.json();
+                    }).then(() => {
+                        const reloadActiveButton = document.querySelector('[x-ref="reload-active"]');
+                        reloadActiveButton.click();
+                        const reloadInactiveButton = document.querySelector('[x-ref="reload-inactive"]')
+                        reloadInactiveButton.click();
+                        const buttonModal = document.querySelector('[x-ref="close-modal"]');
+                        buttonModal.click();
+                        this.hireErrData = {
+                            teamId: '',
+                        };
+                    }).catch((err) => {
+                        err.response.then((data) => {
+                            this.hireErrData = data;
+                        });
+                    });
+                },
+
+                async addPlayer() {
+                    await fetch(this.uri, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify(this.formData),
+                    }).then((response) => {
+                        if (!response.ok) {
+                            let err = new Error("HTTP status code: " + response.status)
+                            err.response = response.json();
+                            err.status = response.status
+                            throw err
+                        }
+
+                        return response.json();
+                    }).then((response) => {
+                        this.closeForm();
+                        this.initFormData();
+                        const buttonElement = (response.teamId) ?
+                            document.querySelector('[x-ref="active"]') : document.querySelector('[x-ref="inactive"]');
+                        buttonElement.click();
+
+                        const reloadActiveButton = document.querySelector('[x-ref="reload-active"]');
+                        reloadActiveButton.click();
+                        const reloadInactiveButton = document.querySelector('[x-ref="reload-inactive"]')
+                        reloadInactiveButton.click();
+                    }).catch((err) => {
+                        err.response.then((data) => {
+                            this.formError = data;
+                        });
+                    });
                 },
             }
         }

@@ -1,0 +1,127 @@
+<div x-data="inactivePlayer()">
+    <button x-show="false" @click="retrieveInactivePlayers()" x-ref="reload-inactive"></button>
+    <div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Surname</th>
+                <th scope="col" class="text-right" style="width: 30%">
+                    <span class="float-end">Action</span>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <template x-for="player in inactivePlayers">
+                <tr>
+                    <td x-text="player.name"></td>
+                    <td x-text="player.surname"></td>
+                    <td class="text-right">
+                        <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
+                            <a type="button" class="btn btn-sm btn-outline-primary"
+                               data-toggle="tooltip" data-placement="top" title="Show Player"
+                               x-bind:href="playerUri + player.id">
+                                <i class="fa fa-eye"></i>
+                                &nbsp;Show
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-success"
+                                    data-toggle="tooltip" data-placement="top" title="Bid on player"
+                                    @click="hirePlayer(player.id)">
+                                <i class="fa fa-user-plus" aria-hidden="true"></i>
+                                &nbsp;Hire
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-dark" @click="editPlayer(player.id)">
+                                <i class="fa fa-pencil"></i>
+                                &nbsp;Edit
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" @click="deletePlayer(player.id)">
+                                <i class="fa fa-trash"></i>
+                                &nbsp;Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            <template x-if="inactivePlayers.length === 0">
+                <tr>
+                    <td colspan="5">
+                        <div class="alert alert-info text-center">
+                            There is no players in this team please add new :)
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+
+        </table>
+        <nav aria-label="Page navigation example" x-show="pages > 1">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" :class="{ 'disabled': actualPage === 1 }">
+                    <a class="page-link" href="#" x-on:click.prevent="retrieveInactivePlayers(actualPage-1)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <template x-for="pageNumber in pages" :key="pageNumber">
+                    <li class="page-item" :class="{ 'active': actualPage === pageNumber }">
+                        <a class="page-link" href="#" x-text="pageNumber" x-on:click.prevent="retrieveInactivePlayers(pageNumber)"></a>
+                    </li>
+
+                </template>
+                <li class="page-item" :class="{ 'disabled': actualPage === pages }">
+                    <a class="page-link" href="#" x-on:click.prevent="retrieveInactivePlayers(actualPage+1)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+<script type="application/javascript">
+    function inactivePlayer() {
+        return {
+            inactivePlayers: [],
+            actualPage: 1,
+            pages: 0,
+            uri: '{{ path('api_players_list_inactive') }}',
+
+            async retrieveInactivePlayers(page = this.actualPage) {
+                const params = new URLSearchParams({
+                    page: page
+                });
+                let uri = this.uri + '?' + params.toString();
+                let response = await (await fetch(uri)).json();
+                this.inactivePlayers = response.results;
+                this.actualPage = page;
+                this.pages = response.pageNumber;
+            },
+
+            async deletePlayer(id) {
+                let uri = '{{ path('api_players_list') }}' + id;
+                await fetch(uri, {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                }).then((response) => {
+                    if (!response.ok) {
+                        let err = new Error("HTTP status code: " + response.status)
+                        err.response = response.json();
+                        err.status = response.status
+                        throw err
+                    }
+
+                    this.retrieveInactivePlayers();
+                }).catch((err) => {
+                    err.response.then((data) => {
+                        this.bidErrData = data;
+                    });
+                });
+            },
+
+            init() {
+                this.retrieveInactivePlayers();
+            }
+        };
+    }
+</script>

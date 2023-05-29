@@ -1,4 +1,5 @@
 <div x-data="activePlayer()">
+    <button x-show="false" @click="retrieveActivePlayers()" x-ref="reload-active"></button>
     <div>
         <table class="table">
             <thead>
@@ -8,16 +9,16 @@
                 <th scope="col">Team</th>
                 <th scope="col">Actual value</th>
                 <th scope="col">Active bids</th>
-                <th scope="col" class="text-right" style="width: 10%">Action</th>
+                <th scope="col" class="text-right" style="width: 20%">Action</th>
             </tr>
             </thead>
             <tbody>
-            <template x-for="player in players">
+            <template x-for="player in activePlayers">
                 <tr>
                     <td x-text="player.player.name"></td>
                     <td x-text="player.player.surname"></td>
                     <td x-text="player.team.name"></td>
-                    <td x-text="player.amountValue"></td>
+                    <td x-text="player.sellingValue ?? player.amountValue"></td>
                     <td x-text="player.countActiveBid"></td>
                     <td class="text-right">
                         <div class="btn-group float-end" role="group" aria-label="Basic outlined example">
@@ -25,20 +26,23 @@
                                data-toggle="tooltip" data-placement="top" title="Show Player"
                                x-bind:href="playerUri + player.player.id">
                                 <i class="fa fa-eye"></i>
+                                &nbsp;Show
                             </a>
-                            <button type="button" class="btn btn-sm btn-outline-primary"
+                            <button type="button" class="btn btn-sm btn-outline-success"
                                     data-toggle="tooltip" data-placement="top" title="Bid on player"
                                     @click="bidPlayer(player.id)">
                                 <i class="fa fa-gavel" aria-hidden="true"></i>
+                                &nbsp;Bid
                             </button>
                             <button type="button" class="btn btn-sm btn-outline-dark" @click="editPlayer(player.player.id)">
                                 <i class="fa fa-pencil"></i>
+                                &nbsp;Edit
                             </button>
                         </div>
                     </td>
                 </tr>
             </template>
-            <template x-if="players.length === 0">
+            <template x-if="activePlayers.length === 0">
                 <tr>
                     <td colspan="5">
                         <div class="alert alert-info text-center">
@@ -75,7 +79,7 @@
 <script type="application/javascript">
     function activePlayer() {
         return {
-            players: [],
+            activePlayers: [],
             actualPage: 1,
             pages: 0,
             uri: '{{ path('api_players_list') }}',
@@ -86,7 +90,7 @@
                 });
                 let uri = this.uri + '?' + params.toString();
                 let response = await (await fetch(uri)).json();
-                this.players = response.results;
+                this.activePlayers = response.results;
                 this.actualPage = page;
                 this.pages = response.pageNumber;
             },

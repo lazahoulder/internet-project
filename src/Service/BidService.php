@@ -6,6 +6,7 @@ use App\Entity\BidInterface;
 use App\Entity\PlayerTeam;
 use App\Entity\PlayerTeamInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 
 class BidService
 {
@@ -13,6 +14,9 @@ class BidService
         private EntityManagerInterface $manager,
     ){}
 
+    /**
+     * @throws Exception
+     */
     public function acceptBid(BidInterface $bid)
     {
         $buyerTeam = $bid->getTeam();
