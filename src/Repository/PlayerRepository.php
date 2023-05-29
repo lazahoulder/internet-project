@@ -10,9 +10,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use function Doctrine\ORM\QueryBuilder;
 
 /**
  * @extends ServiceEntityRepository<Player>

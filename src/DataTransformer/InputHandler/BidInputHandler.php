@@ -7,6 +7,7 @@ use App\Entity\Bid;
 use App\Repository\BidRepository;
 use App\Repository\PlayerTeamRepository;
 use App\Repository\TeamRepository;
+use Exception;
 
 class BidInputHandler implements InputHandlerInterface
 {

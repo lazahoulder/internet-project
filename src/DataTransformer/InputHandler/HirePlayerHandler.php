@@ -13,7 +13,6 @@ use Exception;
 class HirePlayerHandler implements InputHandlerInterface
 {
     public function __construct(
-        private EntityManagerInterface $manager,
         private PlayerRepository $playerRepository,
         private TeamRepository $teamRepository,
         private PlayerService $playerService

@@ -2,23 +2,19 @@
 
 namespace App\Service;
 
-use App\Entity\Player;
 use App\Entity\PlayerInterface;
 use App\Entity\PlayerTeam;
 use App\Entity\PlayerTeamInterface;
 use App\Entity\TeamInterface;
 use App\Repository\PlayerRepository;
-use App\Repository\PlayerTeamRepository;
 use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 
 class PlayerService
 {
     public function __construct(
         private EntityManagerInterface $manager,
         private PlayerRepository $playerRepository,
-        private PlayerTeamRepository $playerTeamRepository,
     )
     {
 
@@ -62,15 +58,6 @@ class PlayerService
     {
         $playerTeam->closePlayerContract();
         $this->manager->flush();
-    }
-
-    public function deletePlayer(Player $player): void
-    {
-        if ($player->isActive()) {
-            throw new Exception('Active player cannot be removed');
-        }
-
-        $this->playerRepository->remove($player, true);
     }
 
     public function getInactivePlayers(int $page = 1, int $limit = 10): array

@@ -39,7 +39,7 @@ class PlayersFixtures extends Fixture
 
         $team = new Team();
         $team
-            ->setName('mav city')
+            ->setName('man city')
             ->setCountry('england')
             ->setAcountBalance(100000);
         $manager->persist($team);
