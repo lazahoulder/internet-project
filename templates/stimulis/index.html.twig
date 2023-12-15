@@ -1,0 +1,22 @@
+{% set active = 'home' %}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello StimulisController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+    <div {{ stimulus_controller('say-hello') }}>
+        <input type="text" {{ stimulus_target('say-hello', 'name') }}>
+
+        <button {{ stimulus_action('say-hello', 'greet') }}>
+            Greet
+        </button>
+
+        <div {{ stimulus_target('say-hello', 'output') }}></div>
+    </div>
+{% endblock %}
