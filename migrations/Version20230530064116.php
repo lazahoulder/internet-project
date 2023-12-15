@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230524044047 extends AbstractMigration
+final class Version20230530064116 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -20,7 +20,7 @@ final class Version20230524044047 extends AbstractMigration
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE bid (id INT AUTO_INCREMENT NOT NULL, player_team_id INT NOT NULL, team_id INT NOT NULL, value DOUBLE PRECISION NOT NULL, closed TINYINT(1) DEFAULT NULL, INDEX IDX_4AF2B3F3489827EB (player_team_id), INDEX IDX_4AF2B3F3296CD8AE (team_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE bid (id INT AUTO_INCREMENT NOT NULL, player_team_id INT NOT NULL, team_id INT NOT NULL, value DOUBLE PRECISION NOT NULL, closed TINYINT(1) DEFAULT NULL, date DATE NOT NULL, INDEX IDX_4AF2B3F3489827EB (player_team_id), INDEX IDX_4AF2B3F3296CD8AE (team_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE player (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, surname VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE player_team (id INT AUTO_INCREMENT NOT NULL, player_id INT NOT NULL, team_id INT NOT NULL, start_date DATE NOT NULL, end_date DATE DEFAULT NULL, amount_value DOUBLE PRECISION DEFAULT NULL, state VARCHAR(255) NOT NULL, expected_end_date DATE DEFAULT NULL, selling_value DOUBLE PRECISION DEFAULT NULL, INDEX IDX_66FAF62C99E6F5DF (player_id), INDEX IDX_66FAF62C296CD8AE (team_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('CREATE TABLE team (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, acount_balance DOUBLE PRECISION DEFAULT NULL, country VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
