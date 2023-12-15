@@ -10,7 +10,13 @@
 {% endblock %}
 
 {% block body %}
-    <div class="container" x-data="teamShow('{{ team.id }}', '{{ team.countActivePlayers }}')">
+    <div class="container" x-data="team(
+            '{{ path("api_players_list") }}',
+            '{{ path("api_team_add_player", {"id" : team.id}) }}',
+            '{{ path("app_player_index") }}',
+            '{{ team.countActivePlayers }}',
+            '{{ team.id }}'
+        )">
         <div class="row">
             <div class="col-sm-9">
                 <h3>Team</h3>
@@ -31,7 +37,7 @@
                 <h6 class="text-center"><strong>Country:</strong> {{ team.country }}</h6>
             </div>
             <div class="col-sm-4">
-                <h6 class="float-end"><strong>Active players:</strong>&nbsp;<span x-text="countActivePlayers"></span>
+                <h6 class="float-end"><strong>Active players:</strong>&nbsp;<span x-text="countActivePlayers">{{ team.countActivePlayers }}</span>
                 </h6>
             </div>
         </div>
@@ -205,5 +211,4 @@
         </div>
     </div>
 {% endblock %}
-
 

@@ -10,3 +10,7 @@ RUN apt-get update; \
         php8.2-yaml; \
     apt-get clean; \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash; \
+    apt-get install nodejs; \
+    npm install -g npm@9.6.7;
